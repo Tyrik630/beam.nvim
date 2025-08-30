@@ -1,8 +1,13 @@
 beam	beam.txt	/*beam*
-beam-commands	beam.txt	/*beam-commands*
 beam-config	beam.txt	/*beam-config*
 beam-contents	beam.txt	/*beam-contents*
+beam-examples	beam.txt	/*beam-examples*
 beam-intro	beam.txt	/*beam-intro*
+beam-keybindings	beam.txt	/*beam-keybindings*
+beam-quickstart	beam.txt	/*beam-quickstart*
+beam-textobjects	beam.txt	/*beam-textobjects*
+beam-tips	beam.txt	/*beam-tips*
+beam-troubleshooting	beam.txt	/*beam-troubleshooting*
 beam-usage	beam.txt	/*beam-usage*
 beam.nvim	beam.txt	/*beam.nvim*
 beam.txt	beam.txt	/*beam.txt*

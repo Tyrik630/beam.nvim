@@ -6,54 +6,323 @@ BEAM.NVIM - Remote text operations without moving cursor
 CONTENTS                                                        *beam-contents*
 
     Introduction .......................... |beam-intro|
+    Quick Start ........................... |beam-quickstart|
     Usage ................................. |beam-usage|
+    Examples .............................. |beam-examples|
     Configuration ......................... |beam-config|
-    Commands .............................. |beam-commands|
+    Text Objects .......................... |beam-textobjects|
+    Keybindings ........................... |beam-keybindings|
+    Tips & Tricks ......................... |beam-tips|
+    Troubleshooting ....................... |beam-troubleshooting|
 
 ==============================================================================
 INTRODUCTION                                                      *beam-intro*
 
 beam.nvim lets you perform text operations (yank, delete, change, visual
-select) on distant text using search, while keeping your cursor position.
+select) on distant text using search, while keeping your cursor position
+for yank/delete or moving intelligently for change/visual.
+
+Core concept: Instead of jumping to text to operate on it, search for it
+and operate in one fluid motion.
 
 Press `,yi"` → Search → Press Enter → Quotes yanked, cursor stays put.
 
 ==============================================================================
+QUICK START                                                   *beam-quickstart*
+
+1. Install with your favorite plugin manager:
+>lua
+  -- lazy.nvim
+  {
+    "Piotr1215/beam.nvim",
+    config = function()
+      require("beam").setup()
+    end,
+  }
+<
+
+2. Try these commands:
+   - `,yi"<Enter>` - Yank the NEXT quotes (empty search)
+   - `,daw` then search for a word - Delete that specific word
+   - `,cip` then search - Change paragraph at search location
+
+==============================================================================
 USAGE                                                             *beam-usage*
 
-All operations: `{prefix}{operator}{text-object}`
+PATTERN ~
+All operations follow: `{prefix}{operator}{text-object-modifier}{text-object}`
 
-Text Operations:
-  `,yi"`  Search & yank inside quotes
-  `,daw`  Search & delete around word
-  `,cip`  Search & change inside paragraph
-  `,vi{`  Search & visual select inside braces
+OPERATORS ~
+  `y` - Yank (cursor returns to original position)
+  `d` - Delete (cursor returns to original position)  
+  `c` - Change (cursor moves to target, enters insert mode)
+  `v` - Visual (cursor moves to target, enters visual mode)
+  
+  `Y` - Yank entire line
+  `D` - Delete entire line
+  `C` - Change entire line
+  `V` - Visual line mode
 
-Line Operations:
-  `,Y`    Search & yank entire line
-  `,D`    Search & delete entire line
-  `,C`    Search & change entire line
-  `,V`    Search & visual line select
+TEXT OBJECT MODIFIERS ~
+  `i` - Inside (inner)
+  `a` - Around (includes delimiters)
 
-Quick Mode (empty search = next):
-  `,yi"<Enter>`  Yank NEXT quotes
-  `,dip<Enter>`  Delete NEXT paragraph
+SEARCH NAVIGATION ~
+During search (after pressing `,yi"` etc):
+  `Ctrl-G` - Jump to next match while typing
+  `Ctrl-T` - Jump to previous match while typing
+  `Enter`  - Execute operation at current match
+  `Esc`    - Cancel operation
+
+QUICK MODE ~
+Press Enter without typing to operate on NEXT occurrence:
+  `,yi"<Enter>` - Yank next quotes from cursor
+  `,dip<Enter>` - Delete next paragraph
+  `,ciw<Enter>` - Change next word
+
+==============================================================================
+EXAMPLES                                                       *beam-examples*
+
+COMMON WORKFLOWS ~
+
+Yank a function name from elsewhere:
+  1. Press `,yiw` (yank inner word)
+  2. Type `/functionName`
+  3. Press Enter
+  4. Function name yanked, cursor unchanged
+
+Delete contents of distant quotes:
+  1. Press `,di"`
+  2. Search for the line: `/console.log`
+  3. Press Enter
+  4. String inside quotes deleted
+
+Change a variable declaration:
+  1. Press `,ciw`
+  2. Search: `/oldVariable`
+  3. Press Enter
+  4. Now in insert mode at that location
+
+Select a distant code block:
+  1. Press `,vi{`
+  2. Search for function: `/function setup`
+  3. Press Enter
+  4. Function body selected in visual mode
+
+ADVANCED EXAMPLES ~
+
+Multiple similar strings (using Ctrl-G):
+  1. Press `,yi"`
+  2. Start typing: `/error`
+  3. Press `Ctrl-G` twice to skip to third match
+  4. Press Enter to yank that specific one
+
+Yank next markdown code block:
+  1. Press `,yim<Enter>`
+  2. Code block content yanked (not the backticks)
+
+Delete around next function:
+  1. Press `,daf<Enter>` (if you have function text object)
+  2. Entire function deleted
 
 ==============================================================================
 CONFIGURATION                                                    *beam-config*
 
+BASIC SETUP ~
 >lua
   require('beam').setup({
-    prefix = ',',                      -- Prefix key
-    visual_feedback_duration = 150,   -- Visual feedback ms
+    prefix = ',',                      -- Prefix for all mappings
+    visual_feedback_duration = 150,   -- Ms to show selection
     clear_highlight = true,           -- Clear search after operation
+    clear_highlight_delay = 500,      -- Ms before clearing
     enable_default_text_objects = true, -- Enable im/am for markdown
   })
 <
 
-==============================================================================
-COMMANDS                                                       *beam-commands*
+FULL CONFIGURATION ~
+>lua
+  require('beam').setup({
+    -- Change prefix (default: ',')
+    prefix = '<leader>r',
+    
+    -- Visual feedback when operation executes
+    visual_feedback_duration = 200,
+    
+    -- Search highlight behavior
+    clear_highlight = true,
+    clear_highlight_delay = 1000,
+    
+    -- Built-in text objects
+    enable_default_text_objects = true,
+    
+    -- Register custom text objects
+    custom_text_objects = {
+      -- Simple: assumes text object exists (from other plugin)
+      ['f'] = 'function',
+      ['c'] = 'class',
+      
+      -- Full: creates the actual text object
+      ['r'] = {
+        desc = 'ruby block',
+        select = function(inclusive)
+          if inclusive then
+            vim.cmd('normal! vaB')
+          else
+            vim.cmd('normal! viB')
+          end
+        end
+      }
+    }
+  })
+<
 
-beam.nvim creates keymaps dynamically, no ex commands.
+DISABLING DEFAULT MAPPINGS ~
+Set prefix to nil and create your own:
+>lua
+  require('beam').setup({ prefix = nil })
+  
+  -- Create custom mappings
+  vim.keymap.set('n', '<leader>yi', function()
+    _G.BeamYankSearchSetup('i')
+    vim.api.nvim_feedkeys('/', 'n', false)
+  end)
+<
+
+==============================================================================
+TEXT OBJECTS                                              *beam-textobjects*
+
+BUILT-IN TEXT OBJECTS ~
+Standard Vim text objects work automatically:
+  `w`/`W` - word/WORD
+  `s` - sentence  
+  `p` - paragraph
+  `"` `'` `` ` `` - various quotes
+  `(` `)` `b` - parentheses
+  `[` `]` - brackets
+  `{` `}` `B` - braces
+  `<` `>` - angle brackets
+  `t` - HTML/XML tags
+
+MARKDOWN CODE BLOCKS ~
+When `enable_default_text_objects = true`:
+  `im` - Inside markdown code block (content only)
+  `am` - Around markdown code block (including ```)
+
+CUSTOM TEXT OBJECTS ~
+Register your own:
+>lua
+  require('beam').register_text_object('z', {
+    desc = 'fold',
+    select = function(inclusive)
+      vim.cmd('normal! zf' .. (inclusive and 'a' or 'i') .. 'z')
+    end
+  })
+<
+
+INTEGRATION WITH OTHER PLUGINS ~
+If you have treesitter-textobjects:
+>lua
+  custom_text_objects = {
+    ['f'] = 'function',      -- Uses existing @function.inner/outer
+    ['c'] = 'class',         -- Uses existing @class.inner/outer
+    ['l'] = 'loop',          -- Uses existing @loop.inner/outer
+  }
+<
+
+==============================================================================
+KEYBINDINGS                                              *beam-keybindings*
+
+With default prefix ',':
+
+TEXT OBJECT OPERATIONS ~
+  `,y{motion}` - Yank at search location
+  `,d{motion}` - Delete at search location  
+  `,c{motion}` - Change at search location
+  `,v{motion}` - Visual select at search location
+
+  Examples: `,yiw` `,di"` `,cap` `,vi{`
+
+LINE OPERATIONS ~
+  `,Y` - Yank entire line at search
+  `,D` - Delete entire line at search
+  `,C` - Change entire line at search  
+  `,V` - Visual line at search
+
+ALL COMBINATIONS ~
+The plugin generates hundreds of mappings from your text objects.
+With 20 text objects, you get 80+ mappings automatically:
+- 20 yank operations (,yi{obj}, ,ya{obj})
+- 20 delete operations (,di{obj}, ,da{obj})
+- 20 change operations (,ci{obj}, ,ca{obj})
+- 20 visual operations (,vi{obj}, ,va{obj})
+- Plus line operations
+
+==============================================================================
+TIPS & TRICKS                                                    *beam-tips*
+
+QUICK MODE IS POWERFUL ~
+Empty search to operate on next occurrence is often fastest:
+  `,yi(<Enter>` - Faster than `f(yi(`
+  `,daw<Enter>` - Faster than `dww`
+  `,Y<Enter>`   - Yank any next line instantly
+
+USE WITH MACROS ~
+beam operations work in macros:
+  `qa,yi"<Enter>q` - Macro to yank next quotes
+  
+COMBINE WITH SEARCH HISTORY ~
+Use `/` history to repeat operations:
+  `,yi"` → `/pattern` → Later: `,yi"` → `/<Up>`
+
+VISUAL FEEDBACK ~
+The brief visual selection shows exactly what will be operated on.
+Adjust duration if needed:
+>lua
+  visual_feedback_duration = 250  -- Longer feedback
+<
+
+STATUSLINE INTEGRATION ~
+Show pending operations in statusline:
+>lua
+  -- Lualine
+  sections = {
+    lualine_x = {
+      function() 
+        return vim.g.beam_search_operator_indicator or ''
+      end
+    }
+  }
+<
+
+==============================================================================
+TROUBLESHOOTING                                         *beam-troubleshooting*
+
+OPERATION DOESN'T WORK ~
+- Check if the text object exists: Try using it normally (e.g., `diw`)
+- Ensure search found a match: The cursor should be at match location
+- For custom text objects: Verify they work outside beam first
+
+CURSOR POSITION UNEXPECTED ~
+- Yank/Delete: Cursor should return to original position
+- Change/Visual: Cursor should stay at target (this is intended)
+
+CUSTOM TEXT OBJECTS NOT WORKING ~
+- String format only adds beam mappings, doesn't create text object
+- Use table format with `select` function to create actual text object
+- Check `:omap` to see if text object mappings exist
+
+CONFLICTS WITH OTHER PLUGINS ~
+- Change prefix if ',' conflicts:
+>lua
+  require('beam').setup({ prefix = '<leader>r' })
+<
+
+NO VISUAL FEEDBACK ~
+- Increase duration: `visual_feedback_duration = 500`
+- Check if redraw is working: `:redraw!`
+
+HELP NOT FOUND ~
+- Run `:helptags ALL` to regenerate help tags
+- Check if doc/beam.txt exists in plugin directory
 
 vim:tw=78:ts=8:ft=help:norl:
