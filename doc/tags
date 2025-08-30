@@ -1,0 +1,8 @@
+beam-configuration	beam.txt	/*beam-configuration*
+beam-contents	beam.txt	/*beam-contents*
+beam-introduction	beam.txt	/*beam-introduction*
+beam-quickstart	beam.txt	/*beam-quickstart*
+beam-textobjects	beam.txt	/*beam-textobjects*
+beam-usage	beam.txt	/*beam-usage*
+beam.nvim	beam.txt	/*beam.nvim*
+beam.txt	beam.txt	/*beam.txt*

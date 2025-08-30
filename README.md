@@ -190,7 +190,7 @@ While searching, use these keys to navigate matches:
 - `Enter` - Execute operation at current match
 - `Esc` - Cancel operation
 
-## How It Works
+## Technical Details
 
 beam.nvim uses a clever three-phase approach:
 
