@@ -14,7 +14,7 @@
 
 ## How it works
 
-Press `,yi"` → Search for any string → Press Enter → The quotes at that location are yanked, and you're still where you started.
+Press `,yi"` or other text object → Search for any string → Press Enter → The quotes at that location are yanked, and you're still where you started.
 
 No jumping. No marks. No macros. Just pure efficiency.
 
