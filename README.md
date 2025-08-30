@@ -2,7 +2,7 @@
 
 **🖖 Beam me up! Transport your text operations across file moving only when required.**
 
-beam.nvim brings a new superpower to Neovim - perform text operations (yank, delete, change, visual selection) anywhere in your file using search, while moving only when needed.
+beam.nvim makes it possible to perform text operations (yank, delete, change, visual selection) anywhere in your file using search, while moving only when needed.
 
 <div align="center">
 
