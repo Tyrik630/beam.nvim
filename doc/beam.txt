@@ -42,7 +42,7 @@ QUICK START                                                   *beam-quickstart*
 <
 
 2. Try these commands:
-   - `,yi"<Enter>` - Yank the NEXT quotes (empty search)
+   - `,yi"<Enter>` - Repeat last search & yank quotes at that location
    - `,daw` then search for a word - Delete that specific word
    - `,cip` then search - Change paragraph at search location
 
@@ -75,10 +75,10 @@ During search (after pressing `,yi"` etc):
   `Esc`    - Cancel operation
 
 QUICK MODE ~
-Press Enter without typing to operate on NEXT occurrence:
-  `,yi"<Enter>` - Yank next quotes from cursor
-  `,dip<Enter>` - Delete next paragraph
-  `,ciw<Enter>` - Change next word
+Press Enter without typing to repeat last search:
+  `,yi"<Enter>` - Search for last pattern & yank quotes there
+  `,dip<Enter>` - Search for last pattern & delete paragraph there
+  `,ciw<Enter>` - Search for last pattern & change word there
 
 ==============================================================================
 EXAMPLES                                                       *beam-examples*
@@ -117,11 +117,11 @@ Multiple similar strings (using Ctrl-G):
   3. Press `Ctrl-G` twice to skip to third match
   4. Press Enter to yank that specific one
 
-Yank next markdown code block:
+Yank markdown code block at search location:
   1. Press `,yim<Enter>`
   2. Code block content yanked (not the backticks)
 
-Delete around next function:
+Delete around function at search location:
   1. Press `,daf<Enter>` (if you have function text object)
   2. Entire function deleted
 
@@ -264,10 +264,10 @@ With 20 text objects, you get 80+ mappings automatically:
 TIPS & TRICKS                                                    *beam-tips*
 
 QUICK MODE IS POWERFUL ~
-Empty search to operate on next occurrence is often fastest:
-  `,yi(<Enter>` - Faster than `f(yi(`
-  `,daw<Enter>` - Faster than `dww`
-  `,Y<Enter>`   - Yank any next line instantly
+Empty search repeats last search pattern:
+  `,yi(<Enter>` - Search last pattern & yank parentheses there
+  `,daw<Enter>` - Search last pattern & delete word there
+  `,Y<Enter>`   - Search last pattern & yank that line
 
 USE WITH MACROS ~
 beam operations work in macros:

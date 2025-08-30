@@ -14,43 +14,17 @@
 
 </div>
 
-## How it works
-
-Press `,yi"` or other text object → Search for any string → Press Enter → The quotes at that location are yanked, and you're still where you started.
-
-No jumping. No marks. No macros. Just pure efficiency.
 
 ## Quick Examples
 
 ```vim
-,yi"<Enter>     " Yank inside the NEXT quotes (empty search)
+,yi"func        " Search for 'func' & yank inside quotes at that location
 ,dip            " Search & delete inside paragraph
 ,ci(func        " Search for 'func' & change inside parentheses
 ,vimclass       " Search for 'class' & select inside code block
 ,Y              " Search & yank entire line
 ```
 
-## Features
-
-### Core Features
-- **Native Search Integration**: Uses Vim's `/` search with incremental highlighting
-- **Cross-Buffer Operations**: Search and operate across all open buffers (optional)
-- **Auto-Discovery**: Automatically discovers and registers ALL text objects from your plugins
-- **Motion Support**: Works with both text objects (`iw`, `a"`) AND motions (`L`, `Q`, `R`)
-- **Visual Feedback**: See what you're about to operate on before it happens
-- **Smart Position Restore**: Stay where you are (or intelligently move for edits)
-- **All Text Objects**: Works with every text object you have installed
-- **Ctrl-G/T Navigation**: Navigate through matches while searching (within current buffer)
-- **Line Operators**: Special `Y`, `D`, `C`, `V` operators for entire lines
-- **WhichKey Support**: Automatic integration if you have WhichKey installed
-- **Custom Text Objects**: Register your own text objects via simple API
-- **Zero Dependencies**: Pure Lua implementation, no external requirements
-
-## QoL Features
-
-- Empty search instantly operates on the next text object with the same search pattern.
-- Search highlight to see exactly what will be affected before the operation completes.
-- Status line integration helps you to know what operation is pending with the optional statusline indicator.
 
 ## Installation
 
@@ -78,67 +52,54 @@ use {
 
 **Note:** The plugin uses `,` as the default prefix. All mappings like `,yi"`, `,dap`, etc. are automatically created. You can customize the prefix in the setup (see Configuration section).
 
-## Cross-Buffer Operations
+## Features
 
-beam.nvim can search and operate across all your open buffers! When enabled, if a search pattern isn't found in the current buffer, beam will search other open buffers and execute the operation there.
+- **Native Search Integration** - Uses Vim's `/` search with incremental highlighting
+- **Universal Text Object Support** - Works with ALL text objects from any plugin
+- **Motion Support** - Handles single-letter motions (`L` for URL, `Q` for quote, etc.)
+- **Cross-Buffer Operations** - Search and operate across all open buffers
+- **Auto-Discovery** - Automatically finds and uses all text objects from your plugins
+- **Visual Feedback** - Shows selection briefly before operation executes
+- **Smart Position Restore** - Yank/delete returns to origin, change/visual stays at target
+- **Search Navigation** - Use `Ctrl-G`/`Ctrl-T` to navigate matches while searching
+- **Line Operators** - Special `Y`, `D`, `C`, `V` operators for entire lines
+- **Statusline Integration** - See pending operations in your statusline
+- **Custom Text Objects** - Define your own text objects
+- **Zero Dependencies** - Pure Lua implementation, no external requirements
 
-### How it works:
-- **Yank/Delete**: Temporarily jumps to the target buffer, performs the operation, and returns you to your original position
-- **Change/Visual**: Opens the target buffer in a split window (or switches to it if already visible) for editing
+## Usage
 
-### Limitations:
-- Ctrl-G/T navigation only works within the current buffer
-- Takes the first match found across buffers (no cross-buffer navigation)
+### How it Works
 
-### Example:
-```vim
-" In buffer 1 (no quotes here)
-,yi"<Enter>searchterm<Enter>
-" Finds 'searchterm' in buffer 2, yanks the quoted content, returns to buffer 1
-```
+1. Press `,yi"` (or any operator + text object)
+2. Search for your target location
+3. Press Enter
+4. Operation executes there, cursor returns (for yank/delete)
 
-## Auto-Discovery
+### Basic Operations
 
-beam.nvim can automatically discover and register ALL text objects and motions from your installed plugins! This includes:
+| Keys | Description |
+|------|-------------|
+| `,yi"` | Search & yank inside quotes |
+| `,dap` | Search & delete around paragraph |
+| `,ciw` | Search & change inside word |
+| `,vi{` | Search & select inside curly braces |
 
-- **nvim-various-textobjs**: `iq`/`aq` (any quote), `ih`/`ah` (markdown headers), `i_`/`a_` (underscore), and many more
-- **mini.ai**: Custom text objects you've configured
-- **nvim-treesitter-textobjects**: `if`/`af` (function), `ic`/`ac` (class), etc.
-- **Built-in Vim text objects**: All the standard ones you know and love
-- **Motions**: Single-letter motions like `L` (url), `Q` (to next quote), `R` (rest of paragraph)
+### Search Navigation
 
-### How It Works
-
-When `auto_discover_text_objects = true`, beam will:
-1. Load your text object plugins
-2. Discover all available text objects and motions
-3. Register them with beam's search operators
-4. Create mappings for each combination
-
-For example, with nvim-various-textobjs installed:
-- `,yih` - Search & yank inside markdown header
-- `,dah` - Search & delete around markdown header (super useful!)
-- `,ciq` - Search & change inside any quote
-- `,yL` - Search & yank to URL (motion)
-- `,cL` - Search & change to URL (motion)
-- `,dR` - Search & delete rest of paragraph (motion)
-
-### Excluding Text Objects and Motions
-
-You can exclude specific text objects or motions from auto-discovery:
-
-```lua
-require('beam').setup({
-  auto_discover_text_objects = true,
-  excluded_text_objects = { 'q', 'z' },  -- Exclude iq/aq and iz/az
-  excluded_motions = { 'Q', 'R' },       -- Exclude Q and R motions
-})
-```
+While searching:
+- `Ctrl-G` - Next match
+- `Ctrl-T` - Previous match  
+- `Enter` - Execute
+- `Esc` - Cancel
 
 ### Commands
 
-- `:BeamDiscoverNow` - Manually trigger text object discovery
-- `:BeamShowTextObjects` - Display all discovered text objects
+| Command | Description |
+|---------|-------------|
+| `:BeamReload` | Reload the plugin configuration |
+| `:BeamDiscoverNow` | Manually trigger text object discovery |
+| `:BeamShowTextObjects` | Display all discovered text objects |
 
 ## Configuration
 
@@ -156,6 +117,63 @@ require('beam').setup({
   excluded_text_objects = {},       -- Exclude specific text objects (e.g., {'q', 'z'})
   excluded_motions = {},             -- Exclude specific motions (e.g., {'Q', 'R'})
 })
+```
+
+### Cross-Buffer Operations
+
+When `cross_buffer = true`, beam searches across all open buffers:
+
+- **Yank/Delete** - Performs operation and returns you to original position
+- **Change/Visual** - Opens target buffer in split or switches to it
+
+```vim
+" Example: Yank quotes from another buffer
+,yi"<Enter>searchterm<Enter>
+" Finds 'searchterm' in any buffer, yanks quotes, returns home
+```
+
+### Auto-Discovery
+
+With `auto_discover_text_objects = true`, beam automatically discovers and registers:
+
+- **nvim-various-textobjs** - `iq` (any quote), `ih` (headers), `L` (URL motion)
+- **mini.ai** - All your custom text objects  
+- **treesitter-textobjects** - `if` (function), `ic` (class), etc.
+- **Built-in Vim** - All standard text objects
+
+This gives you instant access to 100+ combinations like:
+- `,yih` - Search & yank markdown header
+- `,ciq` - Search & change any quote type
+- `,dL` - Search & delete to URL
+
+### Excluding Text Objects and Motions
+
+You can exclude specific text objects or motions from auto-discovery:
+
+```lua
+require('beam').setup({
+  auto_discover_text_objects = true,
+  excluded_text_objects = { 'q', 'z' },  -- Exclude iq/aq and iz/az
+  excluded_motions = { 'Q', 'R' },       -- Exclude Q and R motions
+})
+```
+
+### Statusline Integration
+
+Add the pending operation indicator to your statusline:
+
+![Statusline Indicator](static/status-line.png)
+
+```lua
+-- Lualine
+sections = {
+  lualine_x = {
+    function() return vim.g.beam_search_operator_indicator or '' end
+  }
+}
+
+-- Native statusline
+vim.opt.statusline:append('%{get(g:,"beam_search_operator_indicator","")}')
 ```
 
 ### Full Configuration with All Options
@@ -231,66 +249,6 @@ require('beam').register_text_object('g', {
 **Built-in Text Objects:**
 - `im`/`am` - Inside/around markdown code block (triple backticks) - enabled with `enable_default_text_objects = true`
 
-### Statusline Integration
-
-Add the pending operation indicator to your statusline:
-
-![Statusline Indicator](static/status-line.png)
-
-```lua
--- Lualine
-sections = {
-  lualine_x = {
-    function() return vim.g.beam_search_operator_indicator or '' end
-  }
-}
-
--- Native statusline
-vim.opt.statusline:append('%{get(g:,"beam_search_operator_indicator","")}')
-```
-
-## Usage
-
-### Basic Operations
-
-All operations follow the pattern: `{prefix}{operator}{text-object-modifier}{text-object}`
-
-| Keys | Description |
-|------|-------------|
-| `,yi"` | Search & yank inside quotes |
-| `,dap` | Search & delete around paragraph |
-| `,ciw` | Search & change inside word |
-| `,vi{` | Search & select inside curly braces |
-
-### Quick Mode (Empty Search = Next)
-
-Just press Enter without typing to operate on the NEXT occurrence:
-
-| Keys | Action |
-|------|--------|
-| `,yi"<Enter>` | Yank inside NEXT quotes |
-| `,dip<Enter>` | Delete NEXT paragraph |
-| `,cif<Enter>` | Change NEXT function |
-
-### Line Operations
-
-Special uppercase operators for entire lines:
-
-| Keys | Description |
-|------|-------------|
-| `,Y` | Search & yank entire line |
-| `,D` | Search & delete entire line |
-| `,C` | Search & change entire line |
-| `,V` | Search & visual select entire line |
-
-### Search Navigation
-
-While searching, use these keys to navigate matches:
-- `Ctrl-G` - Jump to next match
-- `Ctrl-T` - Jump to previous match
-- `Enter` - Execute operation at current match
-- `Esc` - Cancel operation
-
 ## Integration with Other Plugins
 
 ### Treesitter Text Objects
@@ -319,12 +277,6 @@ if beam then
   })
 end
 ```
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `:BeamReload` | Reload the plugin configuration |
 
 ## Troubleshooting
 
