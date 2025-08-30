@@ -1,4 +1,4 @@
-.PHONY: test test-verbose clean
+.PHONY: test test-verbose format clean install-hooks
 
 # Run comprehensive test suite (default)
 test:
@@ -10,6 +10,15 @@ test:
 test-verbose:
 	@./scripts/test-verbose
 
+# Format Lua code with stylua
+format:
+	@stylua .
+
+# Install git hooks
+install-hooks:
+	@git config core.hooksPath .githooks
+	@echo "Git hooks installed. Pre-commit hook will format code with stylua."
+
 # Clean test artifacts
 clean:
 	@rm -rf /tmp/lazy-test /tmp/lazy.nvim /tmp/lazy-lock.json
@@ -17,7 +26,8 @@ clean:
 # Help
 help:
 	@echo "Available targets:"
-	@echo "  make test           - Run Plenary test suite"
-	@echo "  make test-integration - Run integration tests"
-	@echo "  make test-verbose   - Run existing test suite"
+	@echo "  make test          - Run comprehensive test suite"
+	@echo "  make test-verbose  - Run tests with detailed output"
+	@echo "  make format        - Format code with stylua"
+	@echo "  make install-hooks - Install git pre-commit hooks"
 	@echo "  make clean         - Clean test artifacts"
