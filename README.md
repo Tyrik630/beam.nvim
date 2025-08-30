@@ -35,6 +35,8 @@ No jumping. No marks. No macros. Just pure efficiency.
 ### Core Features
 - **Native Search Integration**: Uses Vim's `/` search with incremental highlighting
 - **Cross-Buffer Operations**: Search and operate across all open buffers (optional)
+- **Auto-Discovery**: Automatically discovers and registers ALL text objects from your plugins
+- **Motion Support**: Works with both text objects (`iw`, `a"`) AND motions (`L`, `Q`, `R`)
 - **Visual Feedback**: See what you're about to operate on before it happens
 - **Smart Position Restore**: Stay where you are (or intelligently move for edits)
 - **All Text Objects**: Works with every text object you have installed
@@ -95,6 +97,49 @@ beam.nvim can search and operate across all your open buffers! When enabled, if 
 " Finds 'searchterm' in buffer 2, yanks the quoted content, returns to buffer 1
 ```
 
+## Auto-Discovery
+
+beam.nvim can automatically discover and register ALL text objects and motions from your installed plugins! This includes:
+
+- **nvim-various-textobjs**: `iq`/`aq` (any quote), `ih`/`ah` (markdown headers), `i_`/`a_` (underscore), and many more
+- **mini.ai**: Custom text objects you've configured
+- **nvim-treesitter-textobjects**: `if`/`af` (function), `ic`/`ac` (class), etc.
+- **Built-in Vim text objects**: All the standard ones you know and love
+- **Motions**: Single-letter motions like `L` (url), `Q` (to next quote), `R` (rest of paragraph)
+
+### How It Works
+
+When `auto_discover_text_objects = true`, beam will:
+1. Load your text object plugins
+2. Discover all available text objects and motions
+3. Register them with beam's search operators
+4. Create mappings for each combination
+
+For example, with nvim-various-textobjs installed:
+- `,yih` - Search & yank inside markdown header
+- `,dah` - Search & delete around markdown header (super useful!)
+- `,ciq` - Search & change inside any quote
+- `,yL` - Search & yank to URL (motion)
+- `,cL` - Search & change to URL (motion)
+- `,dR` - Search & delete rest of paragraph (motion)
+
+### Excluding Text Objects and Motions
+
+You can exclude specific text objects or motions from auto-discovery:
+
+```lua
+require('beam').setup({
+  auto_discover_text_objects = true,
+  excluded_text_objects = { 'q', 'z' },  -- Exclude iq/aq and iz/az
+  excluded_motions = { 'Q', 'R' },       -- Exclude Q and R motions
+})
+```
+
+### Commands
+
+- `:BeamDiscoverNow` - Manually trigger text object discovery
+- `:BeamShowTextObjects` - Display all discovered text objects
+
 ## Configuration
 
 ### Default Setup
@@ -105,7 +150,38 @@ require('beam').setup({
   visual_feedback_duration = 150,    -- ms to show selection
   clear_highlight = true,            -- Clear search highlight after operation
   clear_highlight_delay = 500,       -- ms before clearing
-  cross_buffer = false,              -- Enable cross-buffer operations (default: false)
+  cross_buffer = false,              -- Enable cross-buffer operations
+  auto_discover_text_objects = true, -- Auto-discover all available text objects
+  show_discovery_notification = true,-- Show notification about discovered objects
+  excluded_text_objects = {},       -- Exclude specific text objects (e.g., {'q', 'z'})
+  excluded_motions = {},             -- Exclude specific motions (e.g., {'Q', 'R'})
+})
+```
+
+### Full Configuration with All Options
+
+```lua
+require('beam').setup({
+  -- Core settings
+  prefix = ',',                      -- Prefix for all mappings
+  
+  -- Visual feedback
+  visual_feedback_duration = 150,    -- Duration to show selection before operation
+  clear_highlight = true,            -- Clear search highlight after operation
+  clear_highlight_delay = 500,       -- Delay before clearing highlight
+  
+  -- Advanced features
+  cross_buffer = false,              -- Search and operate across all buffers
+  auto_discover_text_objects = true, -- Discover text objects from all plugins
+  show_discovery_notification = true,-- Notify about discovered objects
+  excluded_text_objects = {},       -- List of text object keys to exclude (e.g., {'q', 'z'})
+  excluded_motions = {},             -- List of motion keys to exclude (e.g., {'Q', 'R'})
+  
+  -- Custom text objects (in addition to discovered ones)
+  enable_default_text_objects = true, -- Enable beam's built-in text objects
+  custom_text_objects = {
+    -- Your custom text objects here
+  }
 })
 ```
 

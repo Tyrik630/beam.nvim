@@ -2,18 +2,18 @@
 
 # Run comprehensive test suite (default)
 test:
+	@./test/run_all_tests.sh
+
+# Run verbose test suite with detailed output  
+test-verbose:
 	@for test in test/*.lua; do \
 		case "$$test" in \
-			*_spec.lua) continue ;; \
+			*_spec.lua|*run_tests.lua) continue ;; \
 			*) echo "Running $$test..."; \
 			   nvim -l "$$test" || exit 1; \
 			   echo "" ;; \
 		esac \
 	done
-
-# Run verbose test suite with detailed output
-test-verbose:
-	@./scripts/test-verbose
 
 # Format Lua code with stylua
 format:

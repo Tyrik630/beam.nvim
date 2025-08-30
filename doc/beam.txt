@@ -135,9 +135,12 @@ BASIC SETUP ~
     visual_feedback_duration = 150,   -- Ms to show selection
     clear_highlight = true,           -- Clear search after operation
     clear_highlight_delay = 500,      -- Ms before clearing
-    enable_default_text_objects = true, -- Enable im/am for markdown
+    cross_buffer = false,             -- Search across buffers
+    auto_discover_text_objects = true, -- Auto-discover all text objects
+    excluded_text_objects = {},      -- Exclude text objects (e.g., {'q'})
+    excluded_motions = {},            -- Exclude motions (e.g., {'Q', 'R'})
   })
-<
+<<
 
 FULL CONFIGURATION ~
 >lua

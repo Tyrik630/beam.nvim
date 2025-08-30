@@ -7,11 +7,17 @@ M.defaults = {
   clear_highlight_delay = 500,
   cross_buffer = false, -- Disabled by default for safety
   custom_text_objects = {},
+  auto_discover_text_objects = false, -- Auto-discover and register all available text objects
+  show_discovery_notification = false, -- Show notification about discovered text objects
+  excluded_text_objects = {}, -- List of text object keys to exclude from discovery (e.g., {'q', 'z'})
+  excluded_motions = {}, -- List of motion keys to exclude from discovery (e.g., {'Q', 'R'})
   experimental = {
     dot_repeat = false,
     count_support = false,
   },
 }
+
+M.motions = {} -- Will be populated by discovery
 
 M.text_objects = {
   ['"'] = 'double quotes',

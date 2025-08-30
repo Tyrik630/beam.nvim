@@ -6,6 +6,7 @@ function M.setup()
   local cfg = config.current
   local prefix = cfg.prefix or ','
 
+  -- Handle regular text objects (with i/a variants)
   for op_key, op_info in pairs(config.operators) do
     for obj_key, obj_name in pairs(config.text_objects) do
       local obj_desc = type(obj_name) == 'table' and (obj_name.desc or obj_key) or obj_name
@@ -29,6 +30,18 @@ function M.setup()
           end
         end, { desc = desc_a })
       end
+    end
+
+    -- Also handle motions (single-letter mappings without i/a)
+    for motion_key, motion_desc in pairs(config.motions or {}) do
+      local key = prefix .. op_key .. motion_key
+      local desc = 'Search & ' .. op_info.verb .. ' ' .. motion_desc
+      vim.keymap.set('n', key, function()
+        local result = operators['Beam' .. op_info.func](motion_key)
+        if result == '/' then
+          vim.api.nvim_feedkeys('/', 'n', false)
+        end
+      end, { desc = desc })
     end
   end
 

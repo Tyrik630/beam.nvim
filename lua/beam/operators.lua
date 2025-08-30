@@ -31,8 +31,8 @@ M.BeamSearchOperator = function(type)
       vim.cmd('sleep ' .. feedback_duration .. 'm')
       vim.cmd('normal! d')
     elseif action == 'change' then
-      -- Use feedkeys to simulate exact user input
-      -- This should work exactly like manual typing
+      -- Execute the change operation with the actual motion/text object
+      -- Use feedkeys to properly enter insert mode
       vim.api.nvim_feedkeys('c' .. textobj, 'n', false)
     elseif action == 'visual' then
       vim.cmd('normal v' .. textobj)
@@ -219,11 +219,12 @@ M.BeamExecuteSearchOperator = function()
 
   M.BeamSearchOperatorPending = {}
 
-  -- For change operation, use feedkeys directly without operator function
-  if pending.action == 'change' then
-    vim.api.nvim_feedkeys('c' .. pending.textobj, 'n', false)
+  -- For change with single-letter motions, execute directly without operator function
+  if pending.action == 'change' and #pending.textobj == 1 then
+    -- Direct execution for motion-based change using feedkeys with 'm' flag for remap
+    vim.api.nvim_feedkeys('c' .. pending.textobj, 'm', false)
   else
-    -- For other operations, use operator function approach
+    -- Use operator function for everything else
     _G.BeamSearchOperatorWrapper = function(type)
       return M.BeamSearchOperator(type)
     end
