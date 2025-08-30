@@ -20,10 +20,12 @@ jobs:
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: beam.nvim
+          vimdoc: beam
           version: "Neovim >= 0.8.0"
           demojify: true
           treesitter: true
+          toc: true
+          description: "Remote text operations without moving cursor"
           
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
