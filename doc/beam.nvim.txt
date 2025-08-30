@@ -16,8 +16,8 @@ Table of Contents                                *beam.nvim-table-of-contents*
   - Showcase                                    |beam.nvim-beam.nvim-showcase|
   - Commands                                    |beam.nvim-beam.nvim-commands|
   - Troubleshooting                      |beam.nvim-beam.nvim-troubleshooting|
-  - License                                      |beam.nvim-beam.nvim-license|
   - Credits                                      |beam.nvim-beam.nvim-credits|
+  - License                                      |beam.nvim-beam.nvim-license|
 2. Links                                                     |beam.nvim-links|
 
 ==============================================================================
@@ -321,11 +321,6 @@ OPERATIONS NOT EXECUTING? ~
 - Check `:messages` for any error output
 
 
-LICENSE                                          *beam.nvim-beam.nvim-license*
-
-MIT
-
-
 CREDITS                                          *beam.nvim-beam.nvim-credits*
 
 Inspired by the power of Vim’s composable operations and the desire to
@@ -345,6 +340,11 @@ innovative ways of navigating and manipulating text:
 While these plugins focus on cursor movement, beam.nvim takes a different
 approach: **operate on remote text, moving only when it makes sense** - stay in
 place for yank and delete, jump to location for change and visual selection.
+
+
+LICENSE                                          *beam.nvim-beam.nvim-license*
+
+MIT
 
 ------------------------------------------------------------------------------
 
