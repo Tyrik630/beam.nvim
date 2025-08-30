@@ -5,6 +5,7 @@ M.defaults = {
   visual_feedback_duration = 150,
   clear_highlight = true,
   clear_highlight_delay = 500,
+  cross_buffer = false, -- Disabled by default for safety
   custom_text_objects = {},
   experimental = {
     dot_repeat = false,

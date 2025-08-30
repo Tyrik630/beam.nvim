@@ -2,9 +2,14 @@
 
 # Run comprehensive test suite (default)
 test:
-	@nvim -l test/smoke_test.lua && \
-	nvim -l test/text_object_operations.lua && \
-	nvim -l test/comprehensive_operations.lua
+	@for test in test/*.lua; do \
+		case "$$test" in \
+			*_spec.lua) continue ;; \
+			*) echo "Running $$test..."; \
+			   nvim -l "$$test" || exit 1; \
+			   echo "" ;; \
+		esac \
+	done
 
 # Run verbose test suite with detailed output
 test-verbose:

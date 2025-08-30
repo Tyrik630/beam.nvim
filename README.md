@@ -34,10 +34,11 @@ No jumping. No marks. No macros. Just pure efficiency.
 
 ### Core Features
 - **Native Search Integration**: Uses Vim's `/` search with incremental highlighting
+- **Cross-Buffer Operations**: Search and operate across all open buffers (optional)
 - **Visual Feedback**: See what you're about to operate on before it happens
 - **Smart Position Restore**: Stay where you are (or intelligently move for edits)
 - **All Text Objects**: Works with every text object you have installed
-- **Ctrl-G/T Navigation**: Navigate through matches while searching before committing
+- **Ctrl-G/T Navigation**: Navigate through matches while searching (within current buffer)
 - **Line Operators**: Special `Y`, `D`, `C`, `V` operators for entire lines
 - **WhichKey Support**: Automatic integration if you have WhichKey installed
 - **Custom Text Objects**: Register your own text objects via simple API
@@ -75,6 +76,25 @@ use {
 
 **Note:** The plugin uses `,` as the default prefix. All mappings like `,yi"`, `,dap`, etc. are automatically created. You can customize the prefix in the setup (see Configuration section).
 
+## Cross-Buffer Operations
+
+beam.nvim can search and operate across all your open buffers! When enabled, if a search pattern isn't found in the current buffer, beam will search other open buffers and execute the operation there.
+
+### How it works:
+- **Yank/Delete**: Temporarily jumps to the target buffer, performs the operation, and returns you to your original position
+- **Change/Visual**: Opens the target buffer in a split window (or switches to it if already visible) for editing
+
+### Limitations:
+- Ctrl-G/T navigation only works within the current buffer
+- Takes the first match found across buffers (no cross-buffer navigation)
+
+### Example:
+```vim
+" In buffer 1 (no quotes here)
+,yi"<Enter>searchterm<Enter>
+" Finds 'searchterm' in buffer 2, yanks the quoted content, returns to buffer 1
+```
+
 ## Configuration
 
 ### Default Setup
@@ -85,6 +105,7 @@ require('beam').setup({
   visual_feedback_duration = 150,    -- ms to show selection
   clear_highlight = true,            -- Clear search highlight after operation
   clear_highlight_delay = 500,       -- ms before clearing
+  cross_buffer = false,              -- Enable cross-buffer operations (default: false)
 })
 ```
 

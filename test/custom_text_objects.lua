@@ -108,6 +108,8 @@ end)
 
 -- Test 4: Test actual operation with custom text object
 test('Custom text object works with beam operations', function()
+  local operators = require('beam.operators')
+
   vim.cmd('enew!')
   vim.api.nvim_buf_set_lines(0, 0, -1, false, { '{', '  content', '}' })
   vim.api.nvim_win_set_cursor(0, { 2, 0 })
