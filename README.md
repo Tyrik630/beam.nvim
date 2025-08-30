@@ -93,16 +93,23 @@ require('beam').setup({
   prefix = ',',
   enable_default_text_objects = true, -- Enables beam's built-in text objects (currently: im/am for markdown code blocks)
   custom_text_objects = {
-    -- Simple description (no implementation, assumes text object exists)
+    -- Simple format: Just a description for beam operations
+    -- NOTE: This assumes the text object already exists (e.g., from treesitter-textobjects)
+    -- It only adds beam keymaps like ,yiF but doesn't create the iF/aF text object itself
     ['F'] = 'function (treesitter)',
     
-    -- Full implementation (creates the actual text object)
+    -- Full format: Creates the actual text object AND adds beam operations
+    -- This creates the ir/ar text objects that work everywhere in Vim
     ['r'] = {
       desc = 'Ruby block',
       select = function(inclusive)
         -- Your text object implementation
         -- inclusive: true for 'around', false for 'inside'
-        vim.cmd('normal! vaBV')
+        if inclusive then
+          vim.cmd('normal! vaB')  -- around block
+        else
+          vim.cmd('normal! viB')  -- inside block
+        end
       end
     }
   }

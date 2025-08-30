@@ -7,8 +7,11 @@ function M.setup()
   
   for op_key, op_info in pairs(config.operators) do
     for obj_key, obj_name in pairs(config.text_objects) do
+      -- Handle both string descriptions and table definitions
+      local obj_desc = type(obj_name) == 'table' and (obj_name.desc or obj_key) or obj_name
+      
       local key_i = prefix .. op_key .. 'i' .. obj_key
-      local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_name
+      local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_desc
       vim.keymap.set('n', key_i, function()
         local result = _G['Beam' .. op_info.func]('i' .. obj_key)
         if result == '/' then
@@ -18,7 +21,7 @@ function M.setup()
       
       if not (obj_key:match('[bB]')) then
         local key_a = prefix .. op_key .. 'a' .. obj_key
-        local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_name
+        local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_desc
         vim.keymap.set('n', key_a, function()
           local result = _G['Beam' .. op_info.func]('a' .. obj_key)
           if result == '/' then
@@ -60,9 +63,12 @@ function M.create_custom_mappings(text_objects)
   local prefix = cfg.prefix or ','
   
   for obj_key, obj_name in pairs(text_objects) do
+    -- Handle both string descriptions and table definitions
+    local obj_desc = type(obj_name) == 'table' and (obj_name.desc or obj_key) or obj_name
+    
     for op_key, op_info in pairs(config.operators) do
       local key_i = prefix .. op_key .. 'i' .. obj_key
-      local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_name
+      local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_desc
       vim.keymap.set('n', key_i, function()
         local result = _G['Beam' .. op_info.func]('i' .. obj_key)
         if result == '/' then
@@ -72,7 +78,7 @@ function M.create_custom_mappings(text_objects)
       
       if not (obj_key:match('[bB]')) then
         local key_a = prefix .. op_key .. 'a' .. obj_key
-        local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_name
+        local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_desc
         vim.keymap.set('n', key_a, function()
           local result = _G['Beam' .. op_info.func]('a' .. obj_key)
           if result == '/' then
