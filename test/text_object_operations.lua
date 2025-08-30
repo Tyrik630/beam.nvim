@@ -24,6 +24,8 @@ require('beam').setup({
   enable_default_text_objects = true, -- This will register 'im' and 'am' for markdown code blocks
 })
 
+local operators = require('beam.operators')
+
 print('Testing beam.nvim text object operations...')
 print('')
 
@@ -48,13 +50,13 @@ local function perform_beam_operation(action, textobj, target_pos)
 
   -- Setup the operation (simulates pressing ,y/d/c/v + textobj)
   if action == 'yank' then
-    _G.BeamYankSearchSetup(textobj)
+    operators.BeamYankSearchSetup(textobj)
   elseif action == 'delete' then
-    _G.BeamDeleteSearchSetup(textobj)
+    operators.BeamDeleteSearchSetup(textobj)
   elseif action == 'change' then
-    _G.BeamChangeSearchSetup(textobj)
+    operators.BeamChangeSearchSetup(textobj)
   elseif action == 'visual' then
-    _G.BeamVisualSearchSetup(textobj)
+    operators.BeamVisualSearchSetup(textobj)
   end
 
   -- Move to target position (simulates search finding the target)
@@ -63,15 +65,15 @@ local function perform_beam_operation(action, textobj, target_pos)
   end
 
   -- Copy pending state to global vars (simulates what happens after search)
-  if _G.BeamSearchOperatorPending then
+  if operators.BeamSearchOperatorPending then
     vim.g.beam_search_operator_pattern = ''
-    vim.g.beam_search_operator_textobj = _G.BeamSearchOperatorPending.textobj
-    vim.g.beam_search_operator_action = _G.BeamSearchOperatorPending.action
-    vim.g.beam_search_operator_saved_pos = _G.BeamSearchOperatorPending.saved_pos_for_yank
+    vim.g.beam_search_operator_textobj = operators.BeamSearchOperatorPending.textobj
+    vim.g.beam_search_operator_action = operators.BeamSearchOperatorPending.action
+    vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
   end
 
   -- Execute the operation
-  _G.BeamSearchOperator('char')
+  operators.BeamSearchOperator('char')
 
   return initial_pos
 end
@@ -166,13 +168,13 @@ test('  ci" - change inside quotes (setup)', function()
   set_buffer('foo "bar" baz')
 
   -- Test that change setup creates correct state
-  _G.BeamChangeSearchSetup('i"')
+  operators.BeamChangeSearchSetup('i"')
 
-  assert(_G.BeamSearchOperatorPending, 'Should create pending state')
-  assert(_G.BeamSearchOperatorPending.action == 'change', 'Should set change action')
-  assert(_G.BeamSearchOperatorPending.textobj == 'i"', 'Should set text object')
+  assert(operators.BeamSearchOperatorPending, 'Should create pending state')
+  assert(operators.BeamSearchOperatorPending.action == 'change', 'Should set change action')
+  assert(operators.BeamSearchOperatorPending.textobj == 'i"', 'Should set text object')
   assert(
-    not _G.BeamSearchOperatorPending.saved_pos_for_yank,
+    not operators.BeamSearchOperatorPending.saved_pos_for_yank,
     'Should not save position for change (cursor should move)'
   )
 end)
@@ -205,14 +207,14 @@ test('  Y - yank entire line', function()
 
   -- Setup line yank (,Y)
   vim.api.nvim_win_set_cursor(0, { 2, 0 })
-  _G.BeamYankSearchSetup('_')
+  operators.BeamYankSearchSetup('_')
 
   vim.g.beam_search_operator_pattern = ''
   vim.g.beam_search_operator_textobj = '_'
   vim.g.beam_search_operator_action = 'yankline'
   vim.g.beam_search_operator_saved_pos = vim.fn.getpos('.')
 
-  _G.BeamSearchOperator('line')
+  operators.BeamSearchOperator('line')
 
   local yanked = vim.fn.getreg('"')
   assert(yanked:match('second line'), 'Should yank entire second line')
@@ -226,14 +228,14 @@ test('  D - delete entire line', function()
   })
 
   vim.api.nvim_win_set_cursor(0, { 2, 0 })
-  _G.BeamDeleteSearchSetup('_')
+  operators.BeamDeleteSearchSetup('_')
 
   vim.g.beam_search_operator_pattern = ''
   vim.g.beam_search_operator_textobj = '_'
   vim.g.beam_search_operator_action = 'deleteline'
   vim.g.beam_search_operator_saved_pos = vim.fn.getpos('.')
 
-  _G.BeamSearchOperator('line')
+  operators.BeamSearchOperator('line')
 
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   assert(#lines == 2, string.format('Should have 2 lines left, got %d', #lines))
@@ -275,13 +277,13 @@ test('  yim - yank inside markdown code block', function()
   vim.api.nvim_win_set_cursor(0, { 3, 0 })
 
   -- Yank inside markdown code block
-  _G.BeamYankSearchSetup('im')
+  operators.BeamYankSearchSetup('im')
   vim.g.beam_search_operator_pattern = ''
-  vim.g.beam_search_operator_textobj = _G.BeamSearchOperatorPending.textobj
-  vim.g.beam_search_operator_action = _G.BeamSearchOperatorPending.action
-  vim.g.beam_search_operator_saved_pos = _G.BeamSearchOperatorPending.saved_pos_for_yank
+  vim.g.beam_search_operator_textobj = operators.BeamSearchOperatorPending.textobj
+  vim.g.beam_search_operator_action = operators.BeamSearchOperatorPending.action
+  vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
 
-  _G.BeamSearchOperator('line')
+  operators.BeamSearchOperator('line')
 
   local yanked = vim.fn.getreg('"')
   assert(yanked:match('code inside'), 'Should yank code inside block')
@@ -301,13 +303,13 @@ test('  dam - delete around markdown code block', function()
   vim.api.nvim_win_set_cursor(0, { 3, 0 })
 
   -- Delete around markdown code block
-  _G.BeamDeleteSearchSetup('am')
+  operators.BeamDeleteSearchSetup('am')
   vim.g.beam_search_operator_pattern = ''
-  vim.g.beam_search_operator_textobj = _G.BeamSearchOperatorPending.textobj
-  vim.g.beam_search_operator_action = _G.BeamSearchOperatorPending.action
-  vim.g.beam_search_operator_saved_pos = _G.BeamSearchOperatorPending.saved_pos_for_yank
+  vim.g.beam_search_operator_textobj = operators.BeamSearchOperatorPending.textobj
+  vim.g.beam_search_operator_action = operators.BeamSearchOperatorPending.action
+  vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
 
-  _G.BeamSearchOperator('line')
+  operators.BeamSearchOperator('line')
 
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   -- Should have deleted everything including backticks
@@ -318,19 +320,22 @@ end)
 print('')
 print('Setup functions:')
 test('  YankSearchSetup creates correct pending state', function()
-  _G.BeamYankSearchSetup('i"')
-  assert(_G.BeamSearchOperatorPending, 'Should create pending state')
-  assert(_G.BeamSearchOperatorPending.action == 'yank', 'Should set yank action')
-  assert(_G.BeamSearchOperatorPending.textobj == 'i"', 'Should set text object')
-  assert(_G.BeamSearchOperatorPending.saved_pos_for_yank, 'Should save position for yank')
+  operators.BeamYankSearchSetup('i"')
+  assert(operators.BeamSearchOperatorPending, 'Should create pending state')
+  assert(operators.BeamSearchOperatorPending.action == 'yank', 'Should set yank action')
+  assert(operators.BeamSearchOperatorPending.textobj == 'i"', 'Should set text object')
+  assert(operators.BeamSearchOperatorPending.saved_pos_for_yank, 'Should save position for yank')
 end)
 
 test('  ChangeSearchSetup creates correct pending state', function()
-  _G.BeamChangeSearchSetup('iw')
-  assert(_G.BeamSearchOperatorPending, 'Should create pending state')
-  assert(_G.BeamSearchOperatorPending.action == 'change', 'Should set change action')
-  assert(_G.BeamSearchOperatorPending.textobj == 'iw', 'Should set text object')
-  assert(not _G.BeamSearchOperatorPending.saved_pos_for_yank, 'Should not save position for change')
+  operators.BeamChangeSearchSetup('iw')
+  assert(operators.BeamSearchOperatorPending, 'Should create pending state')
+  assert(operators.BeamSearchOperatorPending.action == 'change', 'Should set change action')
+  assert(operators.BeamSearchOperatorPending.textobj == 'iw', 'Should set text object')
+  assert(
+    not operators.BeamSearchOperatorPending.saved_pos_for_yank,
+    'Should not save position for change'
+  )
 end)
 
 print('')

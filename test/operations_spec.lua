@@ -47,10 +47,10 @@ describe('beam operations', function()
       local initial_pos = get_cursor()
 
       -- Simulate the operation
-      _G.BeamYankSearchSetup('i"')
+      operators.BeamYankSearchSetup('i"')
       -- Simulate finding and executing at position
       vim.api.nvim_win_set_cursor(0, { 1, 5 }) -- Move to inside quotes
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       -- Check that content was yanked
       assert.equals('bar', get_register())
@@ -62,9 +62,9 @@ describe('beam operations', function()
       set_buffer('foo bar baz', { 1, 0 })
       local initial_pos = get_cursor()
 
-      _G.BeamYankSearchSetup('aw')
+      operators.BeamYankSearchSetup('aw')
       vim.api.nvim_win_set_cursor(0, { 1, 4 }) -- Move to 'bar'
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       assert.equals('bar ', get_register())
       assert.are.same(initial_pos, get_cursor())
@@ -73,9 +73,9 @@ describe('beam operations', function()
     it('should yank inside parentheses', function()
       set_buffer('foo(bar, baz) end', { 1, 0 })
 
-      _G.BeamYankSearchSetup('i(')
+      operators.BeamYankSearchSetup('i(')
       vim.api.nvim_win_set_cursor(0, { 1, 4 })
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       assert.equals('bar, baz', get_register())
     end)
@@ -91,9 +91,9 @@ describe('beam operations', function()
         { 1, 0 }
       )
 
-      _G.BeamYankSearchSetup('iB')
+      operators.BeamYankSearchSetup('iB')
       vim.api.nvim_win_set_cursor(0, { 2, 2 })
-      _G.BeamSearchOperator('line')
+      operators.BeamSearchOperator('line')
 
       local yanked = get_register()
       assert.is_truthy(yanked:match('local x = 1'))
@@ -106,9 +106,9 @@ describe('beam operations', function()
       set_buffer('foo "bar" baz', { 1, 0 })
       local initial_pos = get_cursor()
 
-      _G.BeamDeleteSearchSetup('i"')
+      operators.BeamDeleteSearchSetup('i"')
       vim.api.nvim_win_set_cursor(0, { 1, 5 })
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       assert.equals('foo "" baz', get_buffer())
       assert.are.same(initial_pos, get_cursor())
@@ -127,9 +127,9 @@ describe('beam operations', function()
         { 1, 0 }
       )
 
-      _G.BeamDeleteSearchSetup('ap')
+      operators.BeamDeleteSearchSetup('ap')
       vim.api.nvim_win_set_cursor(0, { 3, 0 })
-      _G.BeamSearchOperator('line')
+      operators.BeamSearchOperator('line')
 
       local result = get_buffer()
       assert.is_falsy(result:match('second paragraph'))
@@ -143,9 +143,16 @@ describe('beam operations', function()
     it('should change inside quotes and move cursor', function()
       set_buffer('foo "bar" baz', { 1, 0 })
 
-      _G.BeamChangeSearchSetup('i"')
+      operators.BeamChangeSearchSetup('i"')
       vim.api.nvim_win_set_cursor(0, { 1, 5 })
-      _G.BeamSearchOperator('char')
+
+      -- Set up the search operation globals
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = 'i"'
+      vim.g.beam_search_operator_action = 'change'
+      vim.g.beam_search_operator_saved_pos = nil
+
+      operators.BeamSearchOperator('char')
 
       -- Should delete content and enter insert mode
       assert.equals('foo "" baz', get_buffer())
@@ -155,12 +162,34 @@ describe('beam operations', function()
       assert.equals(5, pos[2]) -- Inside the empty quotes
     end)
 
+    it('should change inside backticks and position cursor correctly', function()
+      set_buffer('foo `bar` baz', { 1, 0 })
+
+      operators.BeamChangeSearchSetup('i`')
+      vim.api.nvim_win_set_cursor(0, { 1, 5 })
+
+      -- Set up the search operation globals
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = 'i`'
+      vim.g.beam_search_operator_action = 'change'
+      vim.g.beam_search_operator_saved_pos = nil
+
+      operators.BeamSearchOperator('char')
+
+      -- Should delete content and leave cursor between backticks
+      assert.equals('foo `` baz', get_buffer())
+      -- Cursor should be inside the backticks
+      local pos = get_cursor()
+      assert.equals(1, pos[1])
+      assert.equals(5, pos[2]) -- Between the backticks
+    end)
+
     it('should change inside word', function()
       set_buffer('fooBar baz', { 1, 0 })
 
-      _G.BeamChangeSearchSetup('iw')
+      operators.BeamChangeSearchSetup('iw')
       vim.api.nvim_win_set_cursor(0, { 1, 3 })
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       assert.equals(' baz', get_buffer())
       -- Cursor should be at beginning where word was
@@ -174,9 +203,9 @@ describe('beam operations', function()
     it('should select inside brackets and move cursor', function()
       set_buffer('foo [bar] baz', { 1, 0 })
 
-      _G.BeamVisualSearchSetup('i[')
+      operators.BeamVisualSearchSetup('i[')
       vim.api.nvim_win_set_cursor(0, { 1, 5 })
-      _G.BeamSearchOperator('char')
+      operators.BeamSearchOperator('char')
 
       -- Check visual mode is active
       local mode = vim.fn.mode()
@@ -200,9 +229,9 @@ describe('beam operations', function()
       )
 
       -- This would be triggered by ,Y mapping
-      _G.BeamYankSearchSetup('_') -- _ for line
+      operators.BeamYankSearchSetup('_') -- _ for line
       vim.api.nvim_win_set_cursor(0, { 2, 0 })
-      _G.BeamSearchOperator('line')
+      operators.BeamSearchOperator('line')
 
       assert.equals('second line\n', get_register())
     end)
@@ -217,9 +246,9 @@ describe('beam operations', function()
         { 1, 0 }
       )
 
-      _G.BeamDeleteSearchSetup('_')
+      operators.BeamDeleteSearchSetup('_')
       vim.api.nvim_win_set_cursor(0, { 2, 0 })
-      _G.BeamSearchOperator('line')
+      operators.BeamSearchOperator('line')
 
       local result = get_buffer()
       assert.is_falsy(result:match('second line'))
@@ -261,9 +290,9 @@ describe('beam operations', function()
       it(string.format('should yank %s correctly', test.obj), function()
         set_buffer(test.text, { 1, 0 })
 
-        _G.BeamYankSearchSetup(test.obj)
+        operators.BeamYankSearchSetup(test.obj)
         vim.api.nvim_win_set_cursor(0, test.pos)
-        _G.BeamSearchOperator('char')
+        operators.BeamSearchOperator('char')
 
         assert.equals(
           test.expected,

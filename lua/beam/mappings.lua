@@ -1,5 +1,6 @@
 local M = {}
 local config = require('beam.config')
+local operators = require('beam.operators')
 
 function M.setup()
   local cfg = config.current
@@ -12,7 +13,7 @@ function M.setup()
       local key_i = prefix .. op_key .. 'i' .. obj_key
       local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_desc
       vim.keymap.set('n', key_i, function()
-        local result = _G['Beam' .. op_info.func]('i' .. obj_key)
+        local result = operators['Beam' .. op_info.func]('i' .. obj_key)
         if result == '/' then
           vim.api.nvim_feedkeys('/', 'n', false)
         end
@@ -22,7 +23,7 @@ function M.setup()
         local key_a = prefix .. op_key .. 'a' .. obj_key
         local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_desc
         vim.keymap.set('n', key_a, function()
-          local result = _G['Beam' .. op_info.func]('a' .. obj_key)
+          local result = operators['Beam' .. op_info.func]('a' .. obj_key)
           if result == '/' then
             vim.api.nvim_feedkeys('/', 'n', false)
           end
@@ -35,7 +36,7 @@ function M.setup()
     local key = prefix .. op_key
     local desc = 'Search & ' .. op_info.verb
     vim.keymap.set('n', key, function()
-      _G.BeamSearchOperatorPending = {
+      operators.BeamSearchOperatorPending = {
         action = op_info.action,
         textobj = '',
         saved_pos_for_yank = op_info.save_pos and vim.fn.getpos('.') or nil,
@@ -47,7 +48,7 @@ function M.setup()
         silent! augroup! BeamSearchOperatorExecute
         augroup BeamSearchOperatorExecute
           autocmd!
-          autocmd CmdlineLeave / ++once lua BeamExecuteSearchOperator(); vim.g.beam_search_operator_indicator = nil; vim.cmd('redrawstatus')
+          autocmd CmdlineLeave / ++once lua require('beam.operators').BeamExecuteSearchOperator(); vim.g.beam_search_operator_indicator = nil; vim.cmd('redrawstatus')
         augroup END
       ]])
 
@@ -69,7 +70,7 @@ function M.create_custom_mappings(text_objects)
       local key_i = prefix .. op_key .. 'i' .. obj_key
       local desc_i = 'Search & ' .. op_info.verb .. ' inside ' .. obj_desc
       vim.keymap.set('n', key_i, function()
-        local result = _G['Beam' .. op_info.func]('i' .. obj_key)
+        local result = operators['Beam' .. op_info.func]('i' .. obj_key)
         if result == '/' then
           vim.api.nvim_feedkeys('/', 'n', false)
         end
@@ -79,7 +80,7 @@ function M.create_custom_mappings(text_objects)
         local key_a = prefix .. op_key .. 'a' .. obj_key
         local desc_a = 'Search & ' .. op_info.verb .. ' around ' .. obj_desc
         vim.keymap.set('n', key_a, function()
-          local result = _G['Beam' .. op_info.func]('a' .. obj_key)
+          local result = operators['Beam' .. op_info.func]('a' .. obj_key)
           if result == '/' then
             vim.api.nvim_feedkeys('/', 'n', false)
           end

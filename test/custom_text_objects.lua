@@ -114,10 +114,10 @@ test('Custom text object works with beam operations', function()
 
   -- The 'r' text object should be available for beam operations
   -- even though we can't easily test the full flow here
-  _G.BeamYankSearchSetup('ir')
+  operators.BeamYankSearchSetup('ir')
 
-  assert(_G.BeamSearchOperatorPending, 'Should create pending state')
-  assert(_G.BeamSearchOperatorPending.textobj == 'ir', 'Should use custom text object')
+  assert(operators.BeamSearchOperatorPending, 'Should create pending state')
+  assert(operators.BeamSearchOperatorPending.textobj == 'ir', 'Should use custom text object')
 end)
 
 print('')

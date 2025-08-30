@@ -1,7 +1,7 @@
 local M = {}
 local config = require('beam.config')
 
-_G.BeamSearchOperator = function(type)
+M.BeamSearchOperator = function(type)
   local pattern = vim.g.beam_search_operator_pattern
   local saved_pos = vim.g.beam_search_operator_saved_pos
   local textobj = vim.g.beam_search_operator_textobj
@@ -30,10 +30,9 @@ _G.BeamSearchOperator = function(type)
       vim.cmd('sleep ' .. feedback_duration .. 'm')
       vim.cmd('normal! d')
     elseif action == 'change' then
-      -- For custom text objects, we need to select them first then change
-      vim.cmd('normal v' .. textobj)
-      vim.cmd('normal! c')
-      vim.cmd('startinsert')
+      -- Use feedkeys to simulate exact user input
+      -- This should work exactly like manual typing
+      vim.api.nvim_feedkeys('c' .. textobj, 'n', false)
     elseif action == 'visual' then
       vim.cmd('normal v' .. textobj)
     elseif action == 'yankline' then
@@ -84,10 +83,10 @@ _G.BeamSearchOperator = function(type)
   vim.g.beam_search_operator_action = nil
 end
 
-_G.BeamSearchOperatorPending = {}
+M.BeamSearchOperatorPending = {}
 
-_G.BeamExecuteSearchOperator = function()
-  local pending = _G.BeamSearchOperatorPending
+M.BeamExecuteSearchOperator = function()
+  local pending = M.BeamSearchOperatorPending
   if not pending or not pending.action or not pending.textobj then
     vim.cmd('silent! autocmd! BeamSearchOperatorExecute')
     return
@@ -95,7 +94,7 @@ _G.BeamExecuteSearchOperator = function()
 
   local pattern = vim.fn.getreg('/')
   if not pattern or pattern == '' then
-    _G.BeamSearchOperatorPending = {}
+    M.BeamSearchOperatorPending = {}
     vim.cmd('silent! autocmd! BeamSearchOperatorExecute')
     vim.g.beam_search_operator_indicator = nil
     vim.cmd('redrawstatus')
@@ -107,15 +106,24 @@ _G.BeamExecuteSearchOperator = function()
   vim.g.beam_search_operator_textobj = pending.textobj
   vim.g.beam_search_operator_action = pending.action
 
-  _G.BeamSearchOperatorPending = {}
+  M.BeamSearchOperatorPending = {}
 
-  vim.opt.operatorfunc = 'v:lua.BeamSearchOperator'
-  vim.api.nvim_feedkeys('g@l', 'n', false)
+  -- For change operation, use feedkeys directly without operator function
+  if pending.action == 'change' then
+    vim.api.nvim_feedkeys('c' .. pending.textobj, 'n', false)
+  else
+    -- For other operations, use operator function approach
+    _G.BeamSearchOperatorWrapper = function(type)
+      return M.BeamSearchOperator(type)
+    end
+    vim.opt.operatorfunc = 'v:lua.BeamSearchOperatorWrapper'
+    vim.api.nvim_feedkeys('g@l', 'n', false)
+  end
 end
 
 function M.create_setup_function(action, save_pos)
   return function(textobj)
-    _G.BeamSearchOperatorPending = {
+    M.BeamSearchOperatorPending = {
       action = action,
       textobj = textobj,
       saved_pos_for_yank = save_pos and vim.fn.getpos('.') or nil,
@@ -127,7 +135,7 @@ function M.create_setup_function(action, save_pos)
       silent! augroup! BeamSearchOperatorExecute
       augroup BeamSearchOperatorExecute
         autocmd!
-        autocmd CmdlineLeave / ++once lua BeamExecuteSearchOperator(); vim.g.beam_search_operator_indicator = nil; vim.cmd('redrawstatus')
+        autocmd CmdlineLeave / ++once lua require('beam.operators').BeamExecuteSearchOperator(); vim.g.beam_search_operator_indicator = nil; vim.cmd('redrawstatus')
       augroup END
     ]])
 
@@ -136,9 +144,9 @@ function M.create_setup_function(action, save_pos)
   end
 end
 
-_G.BeamYankSearchSetup = M.create_setup_function('yank', true)
-_G.BeamDeleteSearchSetup = M.create_setup_function('delete', true)
-_G.BeamChangeSearchSetup = M.create_setup_function('change', false)
-_G.BeamVisualSearchSetup = M.create_setup_function('visual', false)
+M.BeamYankSearchSetup = M.create_setup_function('yank', true)
+M.BeamDeleteSearchSetup = M.create_setup_function('delete', true)
+M.BeamChangeSearchSetup = M.create_setup_function('change', false)
+M.BeamVisualSearchSetup = M.create_setup_function('visual', false)
 
 return M

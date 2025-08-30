@@ -35,13 +35,14 @@ test('Setup configures plugin correctly', function()
   assert(config.visual_feedback_duration == 150, 'Default visual feedback duration incorrect')
 end)
 
--- Test that global functions are created
+-- Test that operator functions are created
 test('Global operator functions created', function()
-  assert(_G.BeamSearchOperator, 'BeamSearchOperator not created')
-  assert(_G.BeamYankSearchSetup, 'BeamYankSearchSetup not created')
-  assert(_G.BeamDeleteSearchSetup, 'BeamDeleteSearchSetup not created')
-  assert(_G.BeamChangeSearchSetup, 'BeamChangeSearchSetup not created')
-  assert(_G.BeamVisualSearchSetup, 'BeamVisualSearchSetup not created')
+  local operators = require('beam.operators')
+  assert(operators.BeamSearchOperator, 'BeamSearchOperator not created')
+  assert(operators.BeamYankSearchSetup, 'BeamYankSearchSetup not created')
+  assert(operators.BeamDeleteSearchSetup, 'BeamDeleteSearchSetup not created')
+  assert(operators.BeamChangeSearchSetup, 'BeamChangeSearchSetup not created')
+  assert(operators.BeamVisualSearchSetup, 'BeamVisualSearchSetup not created')
 end)
 
 -- Test that mappings are created
@@ -73,10 +74,11 @@ end)
 
 -- Test pending operation state
 test('Pending operation state is set correctly', function()
-  _G.BeamYankSearchSetup('i"')
-  assert(_G.BeamSearchOperatorPending, 'Pending state not created')
-  assert(_G.BeamSearchOperatorPending.action == 'yank', 'Action not set correctly')
-  assert(_G.BeamSearchOperatorPending.textobj == 'i"', 'Text object not set correctly')
+  local operators = require('beam.operators')
+  operators.BeamYankSearchSetup('i"')
+  assert(operators.BeamSearchOperatorPending, 'Pending state not created')
+  assert(operators.BeamSearchOperatorPending.action == 'yank', 'Action not set correctly')
+  assert(operators.BeamSearchOperatorPending.textobj == 'i"', 'Text object not set correctly')
 end)
 
 print('')

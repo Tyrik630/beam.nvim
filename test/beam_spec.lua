@@ -19,13 +19,13 @@ describe('beam.nvim', function()
     end
 
     -- Clear any existing global functions
-    _G.BeamSearchOperator = nil
-    _G.BeamSearchOperatorPending = nil
-    _G.BeamExecuteSearchOperator = nil
-    _G.BeamYankSearchSetup = nil
-    _G.BeamDeleteSearchSetup = nil
-    _G.BeamChangeSearchSetup = nil
-    _G.BeamVisualSearchSetup = nil
+    operators.BeamSearchOperator = nil
+    operators.BeamSearchOperatorPending = nil
+    operators.BeamExecuteSearchOperator = nil
+    operators.BeamYankSearchSetup = nil
+    operators.BeamDeleteSearchSetup = nil
+    operators.BeamChangeSearchSetup = nil
+    operators.BeamVisualSearchSetup = nil
 
     beam = require('beam')
   end)
@@ -86,39 +86,39 @@ describe('beam.nvim', function()
   describe('operator functions', function()
     it('should create global operator functions', function()
       beam.setup()
-      assert.is_not_nil(_G.BeamSearchOperator)
-      assert.is_not_nil(_G.BeamExecuteSearchOperator)
-      assert.is_not_nil(_G.BeamYankSearchSetup)
-      assert.is_not_nil(_G.BeamDeleteSearchSetup)
-      assert.is_not_nil(_G.BeamChangeSearchSetup)
-      assert.is_not_nil(_G.BeamVisualSearchSetup)
+      assert.is_not_nil(operators.BeamSearchOperator)
+      assert.is_not_nil(operators.BeamExecuteSearchOperator)
+      assert.is_not_nil(operators.BeamYankSearchSetup)
+      assert.is_not_nil(operators.BeamDeleteSearchSetup)
+      assert.is_not_nil(operators.BeamChangeSearchSetup)
+      assert.is_not_nil(operators.BeamVisualSearchSetup)
     end)
 
     it('should set up pending state correctly', function()
       beam.setup()
-      local result = _G.BeamYankSearchSetup('i"')
+      local result = operators.BeamYankSearchSetup('i"')
       assert.equals('/', result)
-      assert.equals('yank', _G.BeamSearchOperatorPending.action)
-      assert.equals('i"', _G.BeamSearchOperatorPending.textobj)
-      assert.is_not_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
+      assert.equals('yank', operators.BeamSearchOperatorPending.action)
+      assert.equals('i"', operators.BeamSearchOperatorPending.textobj)
+      assert.is_not_nil(operators.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
 
     it('should handle delete setup', function()
       beam.setup()
-      local result = _G.BeamDeleteSearchSetup('ap')
+      local result = operators.BeamDeleteSearchSetup('ap')
       assert.equals('/', result)
-      assert.equals('delete', _G.BeamSearchOperatorPending.action)
-      assert.equals('ap', _G.BeamSearchOperatorPending.textobj)
-      assert.is_not_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
+      assert.equals('delete', operators.BeamSearchOperatorPending.action)
+      assert.equals('ap', operators.BeamSearchOperatorPending.textobj)
+      assert.is_not_nil(operators.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
 
     it('should handle change setup without saving position', function()
       beam.setup()
-      local result = _G.BeamChangeSearchSetup('iw')
+      local result = operators.BeamChangeSearchSetup('iw')
       assert.equals('/', result)
-      assert.equals('change', _G.BeamSearchOperatorPending.action)
-      assert.equals('iw', _G.BeamSearchOperatorPending.textobj)
-      assert.is_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
+      assert.equals('change', operators.BeamSearchOperatorPending.action)
+      assert.equals('iw', operators.BeamSearchOperatorPending.textobj)
+      assert.is_nil(operators.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
   end)
 
@@ -161,7 +161,7 @@ describe('beam.nvim', function()
   describe('statusline indicator', function()
     it('should set indicator during operation', function()
       beam.setup()
-      _G.BeamYankSearchSetup('i"')
+      operators.BeamYankSearchSetup('i"')
       assert.equals('yank[i"]', vim.g.beam_search_operator_indicator)
     end)
   end)
