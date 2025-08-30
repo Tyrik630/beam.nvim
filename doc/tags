@@ -1,0 +1,8 @@
+beam	beam.txt	/*beam*
+beam-commands	beam.txt	/*beam-commands*
+beam-config	beam.txt	/*beam-config*
+beam-contents	beam.txt	/*beam-contents*
+beam-intro	beam.txt	/*beam-intro*
+beam-usage	beam.txt	/*beam-usage*
+beam.nvim	beam.txt	/*beam.nvim*
+beam.txt	beam.txt	/*beam.txt*

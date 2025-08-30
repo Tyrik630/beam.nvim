@@ -24,8 +24,10 @@ jobs:
           version: "Neovim >= 0.8.0"
           demojify: true
           treesitter: true
-          toc: true
+          toc: false
           description: "Remote text operations without moving cursor"
+          ignore-rawblocks: true
+          shift-heading-level-by: -1
           
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
