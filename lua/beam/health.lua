@@ -6,29 +6,33 @@ M.check = function()
   local ok = health.ok or health.report_ok
   local warn = health.warn or health.report_warn
   local error = health.error or health.report_error
-  
+
   start('beam.nvim')
-  
+
   if vim.g.loaded_beam then
     ok('Plugin loaded')
   else
     error('Plugin not loaded. Try running :BeamReload')
   end
-  
+
   local config_ok, config = pcall(require, 'beam.config')
   if config_ok and config.current then
     ok('Configuration loaded')
-    
+
     local prefix = config.current.prefix or ','
     local keymaps = vim.api.nvim_get_keymap('n')
     local conflicts = {}
-    
+
     for _, map in ipairs(keymaps) do
-      if map.lhs:sub(1, #prefix) == prefix and not map.lhs:match('beam') and not map.desc:match('[Ss]earch') then
+      if
+        map.lhs:sub(1, #prefix) == prefix
+        and not map.lhs:match('beam')
+        and not map.desc:match('[Ss]earch')
+      then
         table.insert(conflicts, map.lhs)
       end
     end
-    
+
     if #conflicts > 0 and #conflicts < 5 then
       warn('Potential prefix conflicts found: ' .. table.concat(conflicts, ', '))
       warn('Consider using a different prefix in setup()')
@@ -38,7 +42,7 @@ M.check = function()
   else
     error('Configuration not loaded')
   end
-  
+
   local cfg = config and config.current or {}
   local test_map = (cfg.prefix or ',') .. 'yi"'
   local found = false
@@ -48,19 +52,19 @@ M.check = function()
       break
     end
   end
-  
+
   if found then
     ok('Keymaps created successfully')
   else
     error('Keymaps not found. Check your configuration')
   end
-  
+
   if vim.g.beam_search_operator_indicator ~= nil then
     ok('Statusline indicator active: ' .. vim.g.beam_search_operator_indicator)
   else
     ok('Statusline indicator available (currently inactive)')
   end
-  
+
   if _G.BeamSearchOperator and _G.BeamExecuteSearchOperator then
     ok('Core operator functions loaded')
   else

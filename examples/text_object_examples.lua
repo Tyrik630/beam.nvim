@@ -8,10 +8,10 @@ require('beam').setup({
     -- These assume treesitter text objects already exist
     -- Just adds beam operations (,yif, ,dif, etc.)
     ['f'] = 'function',
-    ['c'] = 'class', 
+    ['c'] = 'class',
     ['l'] = 'loop',
     ['a'] = 'parameter',
-  }
+  },
 })
 
 -- SCENARIO 2: You want to create NEW text objects
@@ -24,28 +24,28 @@ require('beam').setup({
       desc = 'XML/HTML tag',
       select = function(inclusive)
         if inclusive then
-          vim.cmd('normal! vat')  -- around tag
+          vim.cmd('normal! vat') -- around tag
         else
-          vim.cmd('normal! vit')  -- inside tag
+          vim.cmd('normal! vit') -- inside tag
         end
-      end
+      end,
     },
-    
+
     -- This creates 'ih'/'ah' for markdown headers
     ['h'] = {
       desc = 'markdown header',
       select = function(inclusive)
         -- Find the current header line
-        vim.cmd('?^#')  -- search backward for #
+        vim.cmd('?^#') -- search backward for #
         if inclusive then
-          vim.cmd('normal! V')  -- select whole line
+          vim.cmd('normal! V') -- select whole line
         else
-          vim.cmd('normal! ^w')  -- skip the # symbols
-          vim.cmd('normal! v$')  -- select to end of line
+          vim.cmd('normal! ^w') -- skip the # symbols
+          vim.cmd('normal! v$') -- select to end of line
         end
-      end
-    }
-  }
+      end,
+    },
+  },
 })
 
 -- SCENARIO 3: Mixed - some exist, some are new
@@ -56,7 +56,7 @@ require('beam').setup({
     -- These already exist from other plugins
     ['f'] = 'function (from treesitter)',
     ['c'] = 'comment (from Comment.nvim)',
-    
+
     -- This is NEW
     ['d'] = {
       desc = 'double brackets [[...]]',
@@ -70,9 +70,9 @@ require('beam').setup({
           vim.cmd('call search("\\]\\]")')
           vim.cmd('normal! 2h')
         end
-      end
-    }
-  }
+      end,
+    },
+  },
 })
 
 -- HOW TO CHECK WHAT TEXT OBJECTS EXIST:
@@ -87,7 +87,7 @@ require('beam').setup({
 
 -- From nvim-treesitter-textobjects (when configured):
 -- if/af - function
--- ic/ac - class/struct  
+-- ic/ac - class/struct
 -- il/al - loop
 -- is/as - scope
 -- ia/aa - parameter

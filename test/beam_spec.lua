@@ -1,13 +1,13 @@
-describe("beam.nvim", function()
+describe('beam.nvim', function()
   local beam
-  
+
   before_each(function()
     -- Clear any previous module loads
-    package.loaded["beam"] = nil
-    package.loaded["beam.config"] = nil
-    package.loaded["beam.operators"] = nil
-    package.loaded["beam.mappings"] = nil
-    
+    package.loaded['beam'] = nil
+    package.loaded['beam.config'] = nil
+    package.loaded['beam.operators'] = nil
+    package.loaded['beam.mappings'] = nil
+
     -- Clear any existing keymaps with our prefix
     if vim and vim.api and vim.api.nvim_get_keymap then
       local keymaps = vim.api.nvim_get_keymap('n')
@@ -17,7 +17,7 @@ describe("beam.nvim", function()
         end
       end
     end
-    
+
     -- Clear any existing global functions
     _G.BeamSearchOperator = nil
     _G.BeamSearchOperatorPending = nil
@@ -26,12 +26,12 @@ describe("beam.nvim", function()
     _G.BeamDeleteSearchSetup = nil
     _G.BeamChangeSearchSetup = nil
     _G.BeamVisualSearchSetup = nil
-    
-    beam = require("beam")
+
+    beam = require('beam')
   end)
-  
-  describe("setup", function()
-    it("should load with default configuration", function()
+
+  describe('setup', function()
+    it('should load with default configuration', function()
       beam.setup()
       local config = beam.get_config()
       assert.equals(',', config.prefix)
@@ -39,8 +39,8 @@ describe("beam.nvim", function()
       assert.equals(true, config.clear_highlight)
       assert.equals(500, config.clear_highlight_delay)
     end)
-    
-    it("should accept custom configuration", function()
+
+    it('should accept custom configuration', function()
       beam.setup({
         prefix = ';',
         visual_feedback_duration = 200,
@@ -51,27 +51,27 @@ describe("beam.nvim", function()
       assert.equals(200, config.visual_feedback_duration)
       assert.equals(false, config.clear_highlight)
     end)
-    
-    it("should merge custom text objects", function()
+
+    it('should merge custom text objects', function()
       beam.setup({
         custom_text_objects = {
           ['x'] = 'custom object',
-        }
+        },
       })
       local config_module = require('beam.config')
       assert.equals('custom object', config_module.text_objects['x'])
     end)
   end)
-  
-  describe("text object registration", function()
-    it("should register single text object", function()
+
+  describe('text object registration', function()
+    it('should register single text object', function()
       beam.setup()
       beam.register_text_object('z', 'test object')
       local config_module = require('beam.config')
       assert.equals('test object', config_module.text_objects['z'])
     end)
-    
-    it("should register multiple text objects", function()
+
+    it('should register multiple text objects', function()
       beam.setup()
       beam.register_text_objects({
         ['x'] = 'object x',
@@ -82,9 +82,9 @@ describe("beam.nvim", function()
       assert.equals('object y', config_module.text_objects['y'])
     end)
   end)
-  
-  describe("operator functions", function()
-    it("should create global operator functions", function()
+
+  describe('operator functions', function()
+    it('should create global operator functions', function()
       beam.setup()
       assert.is_not_nil(_G.BeamSearchOperator)
       assert.is_not_nil(_G.BeamExecuteSearchOperator)
@@ -93,8 +93,8 @@ describe("beam.nvim", function()
       assert.is_not_nil(_G.BeamChangeSearchSetup)
       assert.is_not_nil(_G.BeamVisualSearchSetup)
     end)
-    
-    it("should set up pending state correctly", function()
+
+    it('should set up pending state correctly', function()
       beam.setup()
       local result = _G.BeamYankSearchSetup('i"')
       assert.equals('/', result)
@@ -102,8 +102,8 @@ describe("beam.nvim", function()
       assert.equals('i"', _G.BeamSearchOperatorPending.textobj)
       assert.is_not_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
-    
-    it("should handle delete setup", function()
+
+    it('should handle delete setup', function()
       beam.setup()
       local result = _G.BeamDeleteSearchSetup('ap')
       assert.equals('/', result)
@@ -111,8 +111,8 @@ describe("beam.nvim", function()
       assert.equals('ap', _G.BeamSearchOperatorPending.textobj)
       assert.is_not_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
-    
-    it("should handle change setup without saving position", function()
+
+    it('should handle change setup without saving position', function()
       beam.setup()
       local result = _G.BeamChangeSearchSetup('iw')
       assert.equals('/', result)
@@ -121,11 +121,11 @@ describe("beam.nvim", function()
       assert.is_nil(_G.BeamSearchOperatorPending.saved_pos_for_yank)
     end)
   end)
-  
-  describe("mappings", function()
-    it("should create keymaps with configured prefix", function()
+
+  describe('mappings', function()
+    it('should create keymaps with configured prefix', function()
       beam.setup({ prefix = ',' })
-      
+
       -- Get actual keymaps from Neovim
       local keymaps = vim.api.nvim_get_keymap('n')
       local found = false
@@ -135,27 +135,31 @@ describe("beam.nvim", function()
           break
         end
       end
-      assert.is_true(found, "Should create ,yi\" mapping")
+      assert.is_true(found, 'Should create ,yi" mapping')
     end)
-    
-    it("should create line operator mappings", function()
+
+    it('should create line operator mappings', function()
       beam.setup({ prefix = ',' })
-      
+
       -- Get actual keymaps from Neovim
       local keymaps = vim.api.nvim_get_keymap('n')
       local found_Y = false
       local found_D = false
       for _, map in ipairs(keymaps) do
-        if map.lhs == ',Y' then found_Y = true end
-        if map.lhs == ',D' then found_D = true end
+        if map.lhs == ',Y' then
+          found_Y = true
+        end
+        if map.lhs == ',D' then
+          found_D = true
+        end
       end
-      assert.is_true(found_Y, "Should create ,Y mapping")
-      assert.is_true(found_D, "Should create ,D mapping")
+      assert.is_true(found_Y, 'Should create ,Y mapping')
+      assert.is_true(found_D, 'Should create ,D mapping')
     end)
   end)
-  
-  describe("statusline indicator", function()
-    it("should set indicator during operation", function()
+
+  describe('statusline indicator', function()
+    it('should set indicator during operation', function()
       beam.setup()
       _G.BeamYankSearchSetup('i"')
       assert.equals('yank[i"]', vim.g.beam_search_operator_indicator)

@@ -59,11 +59,11 @@ M.current = {}
 
 function M.setup(opts)
   M.current = vim.tbl_deep_extend('force', M.defaults, opts or {})
-  
+
   if M.current.custom_text_objects then
     M.text_objects = vim.tbl_extend('force', M.text_objects, M.current.custom_text_objects)
   end
-  
+
   return M.current
 end
 

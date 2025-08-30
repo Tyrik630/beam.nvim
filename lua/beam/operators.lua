@@ -49,12 +49,21 @@ _G.BeamSearchOperator = function(type)
   end)
 
   if ok then
-    if (action == 'yank' or action == 'delete' or action == 'yankline' or action == 'deleteline') and saved_pos then
+    if
+      (action == 'yank' or action == 'delete' or action == 'yankline' or action == 'deleteline')
+      and saved_pos
+    then
       vim.fn.setpos('.', saved_pos)
     end
 
     local cfg = config.current
-    if cfg.clear_highlight and action ~= 'change' and action ~= 'visual' and action ~= 'changeline' and action ~= 'visualline' then
+    if
+      cfg.clear_highlight
+      and action ~= 'change'
+      and action ~= 'visual'
+      and action ~= 'changeline'
+      and action ~= 'visualline'
+    then
       vim.defer_fn(function()
         vim.cmd('nohlsearch')
         vim.fn.setreg('/', saved_search)
