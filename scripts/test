@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Run smoke test
+nvim -l test/smoke_test.lua

@@ -9,12 +9,23 @@ describe("beam.nvim", function()
     package.loaded["beam.mappings"] = nil
     
     -- Clear any existing keymaps with our prefix
-    local keymaps = vim.api.nvim_get_keymap('n')
-    for _, map in ipairs(keymaps) do
-      if map.lhs:match('^,') then
-        pcall(vim.keymap.del, 'n', map.lhs)
+    if vim and vim.api and vim.api.nvim_get_keymap then
+      local keymaps = vim.api.nvim_get_keymap('n')
+      for _, map in ipairs(keymaps) do
+        if map.lhs:match('^,') then
+          pcall(vim.keymap.del, 'n', map.lhs)
+        end
       end
     end
+    
+    -- Clear any existing global functions
+    _G.BeamSearchOperator = nil
+    _G.BeamSearchOperatorPending = nil
+    _G.BeamExecuteSearchOperator = nil
+    _G.BeamYankSearchSetup = nil
+    _G.BeamDeleteSearchSetup = nil
+    _G.BeamChangeSearchSetup = nil
+    _G.BeamVisualSearchSetup = nil
     
     beam = require("beam")
   end)
