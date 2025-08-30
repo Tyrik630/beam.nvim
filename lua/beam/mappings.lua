@@ -7,7 +7,6 @@ function M.setup()
   
   for op_key, op_info in pairs(config.operators) do
     for obj_key, obj_name in pairs(config.text_objects) do
-      -- Handle both string descriptions and table definitions
       local obj_desc = type(obj_name) == 'table' and (obj_name.desc or obj_key) or obj_name
       
       local key_i = prefix .. op_key .. 'i' .. obj_key

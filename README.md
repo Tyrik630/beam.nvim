@@ -32,18 +32,20 @@ No jumping. No marks. No macros. Just pure efficiency.
 
 ### Core Features
 - **Native Search Integration**: Uses Vim's `/` search with incremental highlighting
-- **Quick Mode**: Press Enter without searching to operate on the NEXT occurrence
 - **Visual Feedback**: See what you're about to operate on before it happens
 - **Smart Position Restore**: Stay where you are (or intelligently move for edits)
 - **All Text Objects**: Works with every text object you have installed
-- **Statusline Indicator**: Optional indicator shows pending operations
-
-### Advanced Features
 - **Ctrl-G/T Navigation**: Navigate through matches while searching before committing
 - **Line Operators**: Special `Y`, `D`, `C`, `V` operators for entire lines
 - **WhichKey Support**: Automatic integration if you have WhichKey installed
 - **Custom Text Objects**: Register your own text objects via simple API
 - **Zero Dependencies**: Pure Lua implementation, no external requirements
+
+## QoL Features
+
+- Empty search instantly operates on the next text object with the same search pattern.
+- Search highlight to see exactly what will be affected before the operation completes.
+- Status line integration helps you to know what operation is pending with the optional statusline indicator.
 
 ## Installation
 
@@ -190,16 +192,6 @@ While searching, use these keys to navigate matches:
 - `Enter` - Execute operation at current match
 - `Esc` - Cancel operation
 
-## Technical Details
-
-beam.nvim uses a clever three-phase approach:
-
-1. **Setup Phase**: Captures your intended operation and stores it
-2. **Search Phase**: Returns control to Neovim's native `/` search
-3. **Execute Phase**: On search completion, executes the operation at the target location
-
-This approach gives you all of Neovim's search features (regex, case-sensitivity, incremental highlight) for free!
-
 ## Integration with Other Plugins
 
 ### Treesitter Text Objects
@@ -229,28 +221,6 @@ if beam then
 end
 ```
 
-## Comparison with Alternatives
-
-| Feature | beam.nvim | flash.nvim | leap.nvim |
-|---------|-----------|------------|-----------|
-| Dependencies | None | None | None |
-| Learning curve | None (uses `/`) | Labels | 2-char search |
-| Operations | y/d/c/v + lines | Jump only | Jump only |
-| Text objects | All + custom | N/A | N/A |
-| Search regex | Full Vim regex | Limited | No |
-| Native feel | Yes (uses `/`) | No | No |
-
-## Showcase
-
-### Operating on Next Occurrence
-Empty search instantly operates on the next text object - no pattern needed!
-
-### Visual Feedback
-See exactly what will be affected before the operation completes.
-
-### Statusline Integration
-Always know what operation is pending with the optional statusline indicator.
-
 ## Commands
 
 | Command | Description |
@@ -271,13 +241,9 @@ Run `:checkhealth beam` to diagnose common issues.
 - Make sure you have the text objects installed that you're trying to use
 - Check `:messages` for any error output
 
-## Credits
-
-Inspired by the power of Vim's composable operations and the desire to operate on text without losing context.
-
 ### Inspiration
 
-This plugin was inspired by several excellent Neovim plugins that explore innovative ways of navigating and manipulating text:
+Inspired by the power of Vim's composable operations and the desire to operate on text without losing context as well as several excellent Neovim plugins that explore innovative ways of navigating and manipulating text:
 
 - [flash.nvim](https://github.com/folke/flash.nvim) - Jump to any location with minimal keystrokes
 - [leap.nvim](https://github.com/ggandor/leap.nvim) - General-purpose motion plugin with 2-character search

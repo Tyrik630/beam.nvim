@@ -8,12 +8,10 @@ local text_objects = require('beam.text_objects')
 function M.setup(opts)
   config.setup(opts)
   
-  -- Setup custom text objects with actual implementations
   if opts and opts.enable_default_text_objects ~= false then
     text_objects.setup_defaults()
   end
   
-  -- Setup custom text objects from config
   if opts and opts.custom_text_objects then
     for key, obj in pairs(opts.custom_text_objects) do
       if type(obj) == 'table' and obj.select then
@@ -40,7 +38,6 @@ function M.setup(opts)
 end
 
 function M.register_text_object(key, description)
-  -- If it's a table with a select function, register as custom text object
   if type(description) == 'table' and description.select then
     text_objects.register_custom_text_object(key, description)
   end

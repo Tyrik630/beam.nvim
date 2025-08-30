@@ -9,19 +9,16 @@ M.check = function()
   
   start('beam.nvim')
   
-  -- Check if plugin is loaded
   if vim.g.loaded_beam then
     ok('Plugin loaded')
   else
     error('Plugin not loaded. Try running :BeamReload')
   end
   
-  -- Check configuration
   local config_ok, config = pcall(require, 'beam.config')
   if config_ok and config.current then
     ok('Configuration loaded')
     
-    -- Check prefix conflicts
     local prefix = config.current.prefix or ','
     local keymaps = vim.api.nvim_get_keymap('n')
     local conflicts = {}
@@ -42,7 +39,6 @@ M.check = function()
     error('Configuration not loaded')
   end
   
-  -- Check if keymaps are created
   local cfg = config and config.current or {}
   local test_map = (cfg.prefix or ',') .. 'yi"'
   local found = false
@@ -59,14 +55,12 @@ M.check = function()
     error('Keymaps not found. Check your configuration')
   end
   
-  -- Check statusline integration
   if vim.g.beam_search_operator_indicator ~= nil then
     ok('Statusline indicator active: ' .. vim.g.beam_search_operator_indicator)
   else
     ok('Statusline indicator available (currently inactive)')
   end
   
-  -- Check global functions
   if _G.BeamSearchOperator and _G.BeamExecuteSearchOperator then
     ok('Core operator functions loaded')
   else
