@@ -22,6 +22,13 @@ function M.setup(opts)
 
   mappings.setup()
 
+  -- Expose core functions globally for health check and operator functionality
+  _G.BeamSearchOperator = operators.BeamSearchOperator
+  _G.BeamExecuteSearchOperator = operators.BeamExecuteSearchOperator
+
+  -- Mark plugin as loaded
+  vim.g.loaded_beam = true
+
   local has_which_key, which_key = pcall(require, 'which-key')
   if has_which_key then
     local prefix = config.current.prefix or ','
