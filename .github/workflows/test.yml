@@ -22,7 +22,7 @@ jobs:
           neovim: true
           version: ${{ matrix.neovim_version }}
       
-      - name: Run tests
+      - name: Run tests with verbose output
         run: |
           nvim --version
-          ./scripts/test
+          ./scripts/test-verbose

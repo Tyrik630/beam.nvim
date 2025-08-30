@@ -30,7 +30,10 @@ _G.BeamSearchOperator = function(type)
       vim.cmd('sleep ' .. feedback_duration .. 'm')
       vim.cmd('normal! d')
     elseif action == 'change' then
-      vim.api.nvim_feedkeys('c' .. textobj, 'n', false)
+      -- For custom text objects, we need to select them first then change
+      vim.cmd('normal v' .. textobj)
+      vim.cmd('normal! c')
+      vim.cmd('startinsert')
     elseif action == 'visual' then
       vim.cmd('normal v' .. textobj)
     elseif action == 'yankline' then

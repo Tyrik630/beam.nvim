@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+echo "beam.nvim Test Runner"
+echo "===================="
+echo ""
+
+TOTAL_PASSED=0
+TOTAL_FAILED=0
+
+# Function to count test results
+count_results() {
+    local output="$1"
+    local passed=$(echo "$output" | grep -c "✓")
+    local failed=$(echo "$output" | grep -c "✗")
+    TOTAL_PASSED=$((TOTAL_PASSED + passed))
+    TOTAL_FAILED=$((TOTAL_FAILED + failed))
+}
+
+echo "Running all tests..."
+echo ""
+
+# Run smoke tests
+echo "Smoke Tests:"
+echo "------------"
+output=$(nvim -l test/smoke_test.lua 2>&1)
+echo "$output"
+count_results "$output"
+echo ""
+
+# Run text object operations
+echo "Text Object Operations:"
+echo "-----------------------"
+output=$(nvim -l test/text_object_operations.lua 2>&1)
+echo "$output"
+count_results "$output"
+echo ""
+
+# Run comprehensive tests
+echo "Comprehensive Test Matrix:"
+echo "--------------------------"
+output=$(nvim -l test/comprehensive_operations.lua 2>&1)
+echo "$output"
+count_results "$output"
+echo ""
+
+# Final summary
+echo "===================="
+echo "FINAL TEST RESULTS"
+echo "===================="
+echo "✓ Passed: $TOTAL_PASSED"
+echo "✗ Failed: $TOTAL_FAILED"
+echo "─────────────────────"
+echo "Total: $((TOTAL_PASSED + TOTAL_FAILED))"
+echo ""
+
+if [ $TOTAL_FAILED -eq 0 ]; then
+    echo "🎉 All tests passed!"
+    exit 0
+else
+    echo "❌ Some tests failed"
+    exit 1
+fi

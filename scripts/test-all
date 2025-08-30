@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+echo "=== Running beam.nvim test suite ==="
+echo ""
+
+# Run smoke tests
+echo "1. Smoke tests:"
+nvim -l test/smoke_test.lua
+SMOKE_EXIT=$?
+
+echo ""
+
+# Run text object operation tests
+echo "2. Text object operations:"
+nvim -l test/text_object_operations.lua
+OPS_EXIT=$?
+
+echo ""
+
+# Run comprehensive tests (optional - comment out if too verbose)
+if [ "${RUN_COMPREHENSIVE:-0}" = "1" ]; then
+  echo "3. Comprehensive test matrix:"
+  nvim -l test/comprehensive_operations.lua
+  COMP_EXIT=$?
+  echo ""
+fi
+
+echo "=== Test Summary ==="
+
+if [ $SMOKE_EXIT -eq 0 ] && [ $OPS_EXIT -eq 0 ]; then
+  echo "✓ All test suites passed!"
+  exit 0
+else
+  echo "✗ Some tests failed"
+  [ $SMOKE_EXIT -ne 0 ] && echo "  - Smoke tests failed"
+  [ $OPS_EXIT -ne 0 ] && echo "  - Text object operations failed"
+  [ "${RUN_COMPREHENSIVE:-0}" = "1" ] && [ $COMP_EXIT -ne 0 ] && echo "  - Comprehensive tests failed"
+  exit 1
+fi

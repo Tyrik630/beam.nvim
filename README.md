@@ -86,19 +86,42 @@ require('beam').setup({
 
 ### Custom Text Objects
 
+beam.nvim can define its own text objects that work with all beam operations. This is useful when you want text objects that don't exist globally but should work with remote operations.
+
 ```lua
 require('beam').setup({
   prefix = ',',
+  enable_default_text_objects = true, -- Enables beam's built-in text objects (currently: im/am for markdown code blocks)
   custom_text_objects = {
+    -- Simple description (no implementation, assumes text object exists)
     ['F'] = 'function (treesitter)',
-    ['C'] = 'class (treesitter)',
-    ['M'] = 'method',
+    
+    -- Full implementation (creates the actual text object)
+    ['r'] = {
+      desc = 'Ruby block',
+      select = function(inclusive)
+        -- Your text object implementation
+        -- inclusive: true for 'around', false for 'inside'
+        vim.cmd('normal! vaBV')
+      end
+    }
   }
 })
 
 -- Or register them dynamically
-require('beam').register_text_object('r', 'return statement')
+require('beam').register_text_object('z', 'custom zone')
+
+-- Register with implementation
+require('beam').register_text_object('g', {
+  desc = 'git conflict',
+  select = function(inclusive)
+    -- Implementation to select git conflict markers
+  end
+})
 ```
+
+**Built-in Text Objects:**
+- `im`/`am` - Inside/around markdown code block (triple backticks) - enabled with `enable_default_text_objects = true`
 
 ### Statusline Integration
 
