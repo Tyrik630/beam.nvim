@@ -2,6 +2,8 @@
 
 **🖖 Beam me up! Transport your text operations across file moving only when required.**
 
+[![Video Thumbnail](https://img.youtube.com/vi/NYC38m4Z47o/0.jpg)](https://www.youtube.com/watch?v=NYC38m4Z47o)
+
 `beam.nvim` makes it possible to perform text operations (yank, delete, change, visual selection) anywhere in your file using search, while moving only when needed.
 
 <div align="center">
