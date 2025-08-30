@@ -264,10 +264,6 @@ Run `:checkhealth beam` to diagnose common issues.
 - Make sure you have the text objects installed that you're trying to use
 - Check `:messages` for any error output
 
-## License
-
-MIT 
-
 ## Credits
 
 Inspired by the power of Vim's composable operations and the desire to operate on text without losing context.
@@ -282,6 +278,10 @@ This plugin was inspired by several excellent Neovim plugins that explore innova
 - [vim-sneak](https://github.com/justinmk/vim-sneak) - The missing motion for Vim
 
 While these plugins focus on cursor movement, beam.nvim takes a different approach: **operate on remote text, moving only when it makes sense** - stay in place for yank and delete, jump to location for change and visual selection.
+
+## License
+
+MIT 
 
 ---
 
