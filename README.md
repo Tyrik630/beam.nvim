@@ -154,7 +154,7 @@ require('beam').setup({
   visual_feedback_duration = 150,    -- ms to show selection
   clear_highlight = true,            -- Clear search highlight after operation
   clear_highlight_delay = 500,       -- ms before clearing
-  cross_buffer = false,              -- Enable cross-buffer operations
+  cross_buffer = false,              -- [BROKEN] Cross-buffer operations - do not enable
   auto_discover_text_objects = true, -- Auto-discover all available text objects
   show_discovery_notification = true,-- Show notification about discovered objects
   excluded_text_objects = {},       -- Exclude specific text objects (e.g., {'q', 'z'})
@@ -165,10 +165,7 @@ require('beam').setup({
 
 ### Cross-Buffer Operations
 
-When `cross_buffer = true`, beam searches across all open buffers:
-
-- **Yank/Delete** - Performs operation and returns you to original position
-- **Change/Visual** - Opens target buffer in split or switches to it
+**⚠️ Warning**: Cross-buffer functionality is currently broken and should not be enabled. Keep `cross_buffer = false` for reliable operation within the current buffer only.
 
 ```vim
 " Example: Yank quotes from another buffer
@@ -259,7 +256,7 @@ require('beam').setup({
   clear_highlight_delay = 500,       -- Delay before clearing highlight
   
   -- Advanced features
-  cross_buffer = false,              -- Search and operate across all buffers
+  cross_buffer = false,              -- [BROKEN] Do not enable - cross-buffer operations are broken
   auto_discover_text_objects = true, -- Discover text objects from all plugins
   show_discovery_notification = true,-- Notify about discovered objects
   excluded_text_objects = {},       -- List of text object keys to exclude (e.g., {'q', 'z'})
