@@ -55,14 +55,12 @@ function M.setup(opts)
   local has_which_key, which_key = pcall(require, 'which-key')
   if has_which_key then
     local prefix = config.current.prefix or ','
-    which_key.register({
-      [prefix] = {
-        name = 'Remote Operators',
-        y = { name = 'Yank' },
-        d = { name = 'Delete' },
-        c = { name = 'Change' },
-        v = { name = 'Visual' },
-      },
+    which_key.add({
+      { prefix, group = 'Remote Operators' },
+      { prefix .. 'y', group = 'Yank' },
+      { prefix .. 'd', group = 'Delete' },
+      { prefix .. 'c', group = 'Change' },
+      { prefix .. 'v', group = 'Visual' },
     })
   end
 end
