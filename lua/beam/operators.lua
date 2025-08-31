@@ -76,7 +76,8 @@ M.BeamSearchOperator = function(type)
         vim.cmd('normal! V' .. end_line .. 'Gd')
       elseif action == 'change' then
         vim.api.nvim_win_set_cursor(0, { start_line, 0 })
-        vim.cmd('normal! V' .. end_line .. 'Gc')
+        -- Use feedkeys to properly enter insert mode
+        vim.api.nvim_feedkeys('V' .. end_line .. 'Gc', 'n', false)
       elseif action == 'visual' then
         vim.api.nvim_win_set_cursor(0, { start_line, 0 })
         vim.cmd('normal! V' .. end_line .. 'G')
