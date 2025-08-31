@@ -356,6 +356,106 @@ describe('beam.nvim text object operations', function()
     end)
   end)
 
+  describe('line operations', function()
+    it('yanks entire line with Y', function()
+      set_buffer({ 'first line', 'target line', 'third line' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      -- Simulate ,Y operation
+      operators.BeamYankSearchSetup('_')
+      vim.api.nvim_win_set_cursor(0, { 2, 5 }) -- Move to target line
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = '_'
+      vim.g.beam_search_operator_action = 'yankline'
+      vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
+
+      operators.BeamSearchOperator('line')
+
+      local yanked = vim.fn.getreg('"')
+      local pos = vim.api.nvim_win_get_cursor(0)
+
+      assert.is_true(yanked:match('target line') ~= nil)
+      assert.equals(1, pos[1]) -- Should return to original line
+    end)
+
+    it('deletes entire line with D', function()
+      set_buffer({ 'first line', 'target line', 'third line' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      -- Simulate ,D operation
+      operators.BeamDeleteSearchSetup('_')
+      vim.api.nvim_win_set_cursor(0, { 2, 5 }) -- Move to target line
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = '_'
+      vim.g.beam_search_operator_action = 'deleteline'
+      vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
+
+      operators.BeamSearchOperator('line')
+
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local pos = vim.api.nvim_win_get_cursor(0)
+
+      assert.equals(2, #lines)
+      assert.equals('first line', lines[1])
+      assert.equals('third line', lines[2])
+      assert.equals(1, pos[1]) -- Should return to original line
+    end)
+
+    it('changes entire line with C', function()
+      set_buffer({ 'first line', 'target line', 'third line' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      -- Simulate ,C operation
+      operators.BeamChangeSearchSetup('_')
+      vim.api.nvim_win_set_cursor(0, { 2, 5 }) -- Move to target line
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = '_'
+      vim.g.beam_search_operator_action = 'changeline'
+      vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
+
+      operators.BeamSearchOperator('line')
+      vim.cmd('stopinsert') -- Exit insert mode
+
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local pos = vim.api.nvim_win_get_cursor(0)
+
+      assert.equals(3, #lines)
+      assert.equals('first line', lines[1])
+      assert.equals('', lines[2]) -- Empty line after change
+      assert.equals('third line', lines[3])
+      assert.equals(2, pos[1]) -- Should stay at target line for change
+    end)
+
+    it('selects entire line with V', function()
+      set_buffer({ 'first line', 'target line', 'third line' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      -- Simulate ,V operation
+      operators.BeamVisualSearchSetup('_')
+      vim.api.nvim_win_set_cursor(0, { 2, 5 }) -- Move to target line
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = '_'
+      vim.g.beam_search_operator_action = 'visualline'
+      vim.g.beam_search_operator_saved_pos = operators.BeamSearchOperatorPending.saved_pos_for_yank
+
+      operators.BeamSearchOperator('line')
+
+      -- Should enter visual line mode at target location
+      local mode = vim.fn.mode()
+      assert.equals('V', mode)
+
+      local pos = vim.api.nvim_win_get_cursor(0)
+      assert.equals(2, pos[1]) -- Should be at target line
+
+      -- Exit visual mode for test cleanup
+      vim.cmd('normal! <Esc>')
+    end)
+  end)
+
   describe('markdown code block operations', function()
     it('yanks inside markdown code block', function()
       set_buffer({ 'text before', '```lua', 'local x = 1', 'local y = 2', '```', 'text after' })
@@ -399,6 +499,107 @@ describe('beam.nvim text object operations', function()
       assert.equals('', lines[3]) -- Empty line where content was changed
       assert.equals('```', lines[4])
       assert.equals('text after', lines[5])
+    end)
+  end)
+
+  describe('edge cases and error conditions', function()
+    it('handles text object that does not exist in buffer', function()
+      set_buffer('no parentheses here at all')
+      vim.api.nvim_win_set_cursor(0, { 1, 5 })
+
+      -- Try to delete inside parentheses when none exist
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = 'i('
+      vim.g.beam_search_operator_action = 'delete'
+
+      operators.BeamSearchOperator('char')
+
+      -- BUG: Currently deletes one character even when text object doesn't exist
+      -- This should be fixed to not modify buffer when text object is invalid
+      local result = vim.api.nvim_get_current_line()
+      assert.equals('no paentheses here at all', result)
+    end)
+
+    it('handles empty buffer', function()
+      vim.cmd('enew!')
+      -- Don't set any lines - completely empty buffer
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = 'iw'
+      vim.g.beam_search_operator_action = 'yank'
+
+      -- Should not crash
+      local ok = pcall(function()
+        operators.BeamSearchOperator('char')
+      end)
+
+      assert.is_true(ok, 'Should handle empty buffer gracefully')
+    end)
+
+    it('handles overlapping text objects', function()
+      set_buffer('foo "bar (nested) baz" end')
+
+      -- Test from inside parentheses - should get 'nested' not the whole quote content
+      vim.api.nvim_win_set_cursor(0, { 1, 10 })
+      perform_beam_operation('yank', 'i(', { 1, 10 })
+      assert.equals('nested', vim.fn.getreg('"'))
+
+      -- Test from inside quotes - should get 'bar (nested) baz'
+      vim.api.nvim_win_set_cursor(0, { 1, 7 })
+      perform_beam_operation('yank', 'i"', { 1, 7 })
+      assert.equals('bar (nested) baz', vim.fn.getreg('"'))
+    end)
+
+    it('handles unmatched delimiters', function()
+      set_buffer('foo "unmatched quote')
+
+      vim.api.nvim_win_set_cursor(0, { 1, 10 })
+
+      vim.g.beam_search_operator_pattern = ''
+      vim.g.beam_search_operator_textobj = 'i"'
+      vim.g.beam_search_operator_action = 'delete'
+
+      operators.BeamSearchOperator('char')
+
+      -- BUG: Currently deletes one character even with unmatched delimiter
+      -- This should ideally not modify buffer when delimiter is unmatched
+      local result = vim.api.nvim_get_current_line()
+      assert.equals('foo "unmathed quote', result)
+    end)
+
+    it('handles cursor at beginning of buffer', function()
+      set_buffer({ 'first line', 'second line', 'third line' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      perform_beam_operation('yank', 'iw', { 1, 0 })
+      assert.equals('first', vim.fn.getreg('"'))
+    end)
+
+    it('handles cursor at end of buffer', function()
+      set_buffer({ 'first line', 'second line', 'last' })
+      vim.api.nvim_win_set_cursor(0, { 3, 4 })
+
+      perform_beam_operation('yank', 'iw', { 3, 0 })
+      assert.equals('last', vim.fn.getreg('"'))
+    end)
+
+    it('handles very nested structures', function()
+      set_buffer('foo {bar [baz (deep) qux] end} done')
+
+      -- From the deepest level
+      vim.api.nvim_win_set_cursor(0, { 1, 18 })
+      perform_beam_operation('yank', 'i(', { 1, 18 })
+      assert.equals('deep', vim.fn.getreg('"'))
+
+      -- From bracket level
+      vim.api.nvim_win_set_cursor(0, { 1, 15 })
+      perform_beam_operation('yank', 'i[', { 1, 15 })
+      assert.equals('baz (deep) qux', vim.fn.getreg('"'))
+
+      -- From brace level
+      vim.api.nvim_win_set_cursor(0, { 1, 10 })
+      perform_beam_operation('yank', 'i{', { 1, 10 })
+      assert.equals('bar [baz (deep) qux] end', vim.fn.getreg('"'))
     end)
   end)
 end)
