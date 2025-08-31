@@ -11,17 +11,24 @@ PASSED=0
 FAILED=0
 FAILED_TESTS=""
 
-# List of test files to run (excluding debug and temporary files)
-TEST_FILES=(
-  "smoke_test.lua"
-  "comprehensive_operations.lua"
-  "text_object_operations.lua"
-  "cross_buffer_test.lua"
-  "custom_text_objects.lua"
-  "motion_operations_test.lua"
-  "text_object_discovery_test.lua"
-  "search_transform_test.lua"
-)
+# Auto-discover all test files (excluding debug and temporary files)
+TEST_FILES=()
+while IFS= read -r -d '' file; do
+  basename_file=$(basename "$file")
+  # Skip debug files, temporary files, and non-test files
+  if [[ ! "$basename_file" =~ ^debug_ ]] && \
+     [[ ! "$basename_file" =~ _debug\.lua$ ]] && \
+     [[ ! "$basename_file" =~ ^temp_ ]] && \
+     [[ ! "$basename_file" =~ \.tmp$ ]] && \
+     [[ ! "$basename_file" == "minimal_init.lua" ]] && \
+     [[ "$basename_file" =~ \.lua$ ]]; then
+    TEST_FILES+=("$basename_file")
+  fi
+done < <(find test/ -name "*.lua" -type f -print0 | sort -z)
+
+echo "Discovered ${#TEST_FILES[@]} test files:"
+printf "  - %s\n" "${TEST_FILES[@]}"
+echo ""
 
 for test_file in "${TEST_FILES[@]}"; do
   if [ -f "test/$test_file" ]; then

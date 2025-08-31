@@ -116,7 +116,7 @@ end)
 -- Test transform_search_pattern for brackets
 test('transforms pattern for curly braces', function()
   local result = search_transform.transform_search_pattern('test', 'i{', config)
-  assert_equals([[\v\{[^}]*\zstest\ze[^}]*\}]], result)
+  assert_equals([[\v\{\_[^}]*\zstest\ze\_[^}]*\}]], result)
 end)
 
 test('transforms pattern for parentheses', function()
@@ -204,12 +204,12 @@ end)
 -- Test alternative brace syntax (iB/aB)
 test('transforms pattern for alternative brace inside', function()
   local result = search_transform.transform_search_pattern('test', 'iB', config)
-  assert_equals([[\v\{[^}]*\zstest\ze[^}]*\}]], result)
+  assert_equals([[\v\{\_[^}]*\zstest\ze\_[^}]*\}]], result)
 end)
 
 test('transforms pattern for alternative brace around', function()
   local result = search_transform.transform_search_pattern('test', 'aB', config)
-  assert_equals([[\v\{\zs[^}]*test[^}]*\ze\}]], result)
+  assert_equals([[\v\{\zs\_[^}]*test\_[^}]*\ze\}]], result)
 end)
 
 -- Test alternative quote syntax (iq/aq for double quotes)

@@ -21,7 +21,67 @@ M.BeamSearchOperator = function(type)
     local cfg = config.current
     local feedback_duration = cfg.visual_feedback_duration or 150
 
-    if action == 'yank' then
+    -- Special handling for markdown code block text objects
+    if textobj == 'im' or textobj == 'am' then
+      local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+      local last_line = vim.api.nvim_buf_line_count(0)
+
+      -- Search backward for opening ```
+      local start_line = nil
+      for i = cursor_line, 1, -1 do
+        local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
+        if line:match('^%s*```') then
+          start_line = i
+          break
+        end
+      end
+
+      if not start_line then
+        return
+      end
+
+      -- Search forward for closing ```
+      local end_line = nil
+      for i = start_line + 1, last_line do
+        local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
+        if line:match('^%s*```') then
+          end_line = i
+          break
+        end
+      end
+
+      if not end_line then
+        return
+      end
+
+      if textobj == 'im' then
+        -- Inside: exclude backticks
+        start_line = start_line + 1
+        end_line = end_line - 1
+      end
+
+      if start_line > end_line then
+        return
+      end
+
+      -- Execute the action on the code block
+      if action == 'yank' then
+        vim.api.nvim_win_set_cursor(0, { start_line, 0 })
+        vim.cmd('normal! V' .. end_line .. 'G')
+        vim.cmd('redraw')
+        vim.cmd('sleep ' .. feedback_duration .. 'm')
+        vim.cmd('normal! y')
+      elseif action == 'delete' then
+        vim.api.nvim_win_set_cursor(0, { start_line, 0 })
+        vim.cmd('normal! V' .. end_line .. 'Gd')
+      elseif action == 'change' then
+        vim.api.nvim_win_set_cursor(0, { start_line, 0 })
+        vim.cmd('normal! V' .. end_line .. 'Gc')
+      elseif action == 'visual' then
+        vim.api.nvim_win_set_cursor(0, { start_line, 0 })
+        vim.cmd('normal! V' .. end_line .. 'G')
+      end
+    elseif action == 'yank' then
       vim.cmd('normal v' .. textobj)
       vim.cmd('redraw')
       vim.cmd('sleep ' .. feedback_duration .. 'm')

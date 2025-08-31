@@ -51,28 +51,28 @@ M.textobj_constraints = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{[^}]*\zs]] .. search .. [[\ze[^}]*\}]]
+      return [[\v\{\_[^}]*\zs]] .. search .. [[\ze\_[^}]*\}]]
     end,
   },
   ['i}'] = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{[^}]*\zs]] .. search .. [[\ze[^}]*\}]]
+      return [[\v\{\_[^}]*\zs]] .. search .. [[\ze\_[^}]*\}]]
     end,
   },
   ['a{'] = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{\zs[^}]*]] .. search .. [[[^}]*\ze\}]]
+      return [[\v\{\zs\_[^}]*]] .. search .. [[\_[^}]*\ze\}]]
     end,
   },
   ['a}'] = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{\zs[^}]*]] .. search .. [[[^}]*\ze\}]]
+      return [[\v\{\zs\_[^}]*]] .. search .. [[\_[^}]*\ze\}]]
     end,
   },
 
@@ -186,14 +186,14 @@ M.textobj_constraints = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{[^}]*\zs]] .. search .. [[\ze[^}]*\}]]
+      return [[\v\{\_[^}]*\zs]] .. search .. [[\ze\_[^}]*\}]]
     end,
   },
   ['aB'] = {
     delim_open = '{',
     delim_close = '}',
     wrap_pattern = function(search)
-      return [[\v\{\zs[^}]*]] .. search .. [[[^}]*\ze\}]]
+      return [[\v\{\zs\_[^}]*]] .. search .. [[\_[^}]*\ze\}]]
     end,
   },
 
