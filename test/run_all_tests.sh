@@ -20,6 +20,7 @@ TEST_FILES=(
   "custom_text_objects.lua"
   "motion_operations_test.lua"
   "text_object_discovery_test.lua"
+  "search_transform_test.lua"
 )
 
 for test_file in "${TEST_FILES[@]}"; do

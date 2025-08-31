@@ -93,6 +93,49 @@ While searching:
 - `Enter` - Execute
 - `Esc` - Cancel
 
+### Supported Text Objects
+
+beam.nvim supports ALL Vim/Neovim text objects. Here are the most common ones:
+
+#### Built-in Vim Text Objects
+| Text Object | Description | Example Usage |
+|------------|-------------|---------------|
+| `iw`/`aw` | Inside/around word | `,yiw` - yank word |
+| `iW`/`aW` | Inside/around WORD (includes punctuation) | `,diW` - delete WORD |
+| `is`/`as` | Inside/around sentence | `,cis` - change sentence |
+| `ip`/`ap` | Inside/around paragraph | `,vip` - select paragraph |
+| `i"`/`a"` | Inside/around double quotes | `,yi"` - yank quoted text |
+| `i'`/`a'` | Inside/around single quotes | `,di'` - delete quoted text |
+| `` i` ``/`` a` `` | Inside/around backticks | `` ,ci` `` - change backticked |
+| `i(`/`a(`, `i)`/`a)` | Inside/around parentheses | `,yi(` - yank in parens |
+| `i[`/`a[`, `i]`/`a]` | Inside/around square brackets | `,di[` - delete in brackets |
+| `i{`/`a{`, `i}`/`a}` | Inside/around curly braces | `,ci{` - change in braces |
+| `i<`/`a<`, `i>`/`a>` | Inside/around angle brackets | `,vi<` - select in angles |
+| `it`/`at` | Inside/around HTML/XML tags | `,yit` - yank tag content |
+
+#### Alternative Syntax (Vim-compatible)
+| Text Object | Equivalent to | Description |
+|------------|---------------|-------------|
+| `ib`/`ab` | `i(`/`a(` | Inside/around parentheses |
+| `iB`/`aB` | `i{`/`a{` | Inside/around braces |
+| `iq`/`aq` | `i"`/`a"` | Inside/around double quotes |
+
+#### Special Line Operators
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `Y` | Yank entire line at target | `,Y` → search → yank line |
+| `D` | Delete entire line at target | `,D` → search → delete line |
+| `C` | Change entire line at target | `,C` → search → change line |
+| `V` | Select entire line at target | `,V` → search → select line |
+
+#### With Auto-Discovery
+When `auto_discover_text_objects = true`, beam automatically finds and uses text objects from:
+- **treesitter-textobjects**: `if` (function), `ic` (class), `il` (loop), etc.
+- **mini.ai**: Custom text objects you've defined
+- **nvim-various-textobjs**: `ii` (indentation), `R` (rest of line), etc.
+- **targets.vim**: Seek-able text objects with next/last variants
+- Any other plugin that defines text objects!
+
 ### Commands
 
 | Command | Description |
@@ -116,6 +159,7 @@ require('beam').setup({
   show_discovery_notification = true,-- Show notification about discovered objects
   excluded_text_objects = {},       -- Exclude specific text objects (e.g., {'q', 'z'})
   excluded_motions = {},             -- Exclude specific motions (e.g., {'Q', 'R'})
+  smart_highlighting = false,        -- Context-aware search highlighting
 })
 ```
 
@@ -145,6 +189,32 @@ This gives you instant access to 100+ combinations like:
 - `,yih` - Search & yank markdown header
 - `,ciq` - Search & change any quote type
 - `,dL` - Search & delete to URL
+
+### Smart Highlighting (Context-Aware Search)
+
+When `smart_highlighting = true`, beam constrains search results based on the text object you're using. This means when you search with delimiter-based text objects, only matches within those delimiters are highlighted.
+
+#### Example
+```vim
+" Without smart highlighting:
+,di"  → /test  → highlights ALL occurrences of "test"
+
+" With smart highlighting:  
+,di"  → /test  → only highlights "test" inside double quotes
+```
+
+This works for quotes, brackets, HTML tags, and more. The search visually shows you exactly what will be operated on.
+
+#### Supported Text Objects for Smart Highlighting
+- **Quotes**: `i"`, `a"`, `i'`, `a'`, `` i` ``, `` a` ``
+- **Brackets**: `i(`, `a(`, `i[`, `a[`, `i{`, `a{`, `i<`, `a<`
+- **Alternative syntax**: 
+  - `ib`/`ab` (same as `i(`/`a(` - parentheses)
+  - `iB`/`aB` (same as `i{`/`a{` - braces)
+  - `iq`/`aq` (same as `i"`/`a"` - double quotes)
+- **HTML/XML tags**: `it`, `at`
+- **Block comments**: `iC`, `aC`
+- **Function arguments**: `ia`
 
 ### Excluding Text Objects and Motions
 

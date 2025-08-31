@@ -1,5 +1,6 @@
 local M = {}
 local config = require('beam.config')
+local search_transform = require('beam.search_transform')
 
 M.BeamSearchOperator = function(type)
   local pattern = vim.g.beam_search_operator_pattern
@@ -244,6 +245,47 @@ function M.create_setup_function(action, save_pos)
 
     vim.g.beam_search_operator_indicator = action .. '[' .. textobj .. ']'
 
+    -- Check if smart highlighting is enabled and text object has constraints
+    local cfg = config.current
+    if cfg.smart_highlighting and search_transform.has_constraints(textobj) then
+      -- Get prefix and suffix for the text object
+      local constraint = search_transform.textobj_constraints[textobj]
+      if constraint and constraint.wrap_pattern then
+        -- Extract prefix and suffix from the wrap pattern
+        local test_pattern = constraint.wrap_pattern('TEST')
+        local prefix = test_pattern:match('^(.*)TEST')
+        local suffix = test_pattern:match('TEST(.*)$')
+
+        if prefix and suffix then
+          -- Store suffix for later (use buffer-local to avoid global state)
+          vim.b.beam_smart_suffix = suffix
+
+          -- Start search with prefix
+          vim.defer_fn(function()
+            vim.api.nvim_feedkeys('/' .. prefix, 'n', false)
+          end, 10)
+
+          -- Map Enter to add suffix
+          vim.cmd([[
+            cnoremap <expr> <CR> getcmdtype() == '/' && exists('b:beam_smart_suffix') ? '<End>' . b:beam_smart_suffix . '<CR>' : '<CR>'
+          ]])
+
+          -- Setup autocmd for execution
+          vim.cmd([[
+            silent! augroup! BeamSearchOperatorExecute
+            augroup BeamSearchOperatorExecute
+              autocmd!
+              autocmd CmdlineLeave / ++once lua require('beam.operators').BeamExecuteSearchOperator(); vim.g.beam_search_operator_indicator = nil; vim.cmd('redrawstatus'); vim.cmd('silent! cunmap <CR>'); vim.b.beam_smart_suffix = nil
+            augroup END
+          ]])
+
+          vim.cmd('redrawstatus')
+          return '' -- Don't return '/' since we're starting search with feedkeys
+        end
+      end
+    end
+
+    -- Standard search (no smart highlighting)
     vim.cmd([[
       silent! augroup! BeamSearchOperatorExecute
       augroup BeamSearchOperatorExecute

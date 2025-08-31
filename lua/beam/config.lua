@@ -11,6 +11,7 @@ M.defaults = {
   show_discovery_notification = false, -- Show notification about discovered text objects
   excluded_text_objects = {}, -- List of text object keys to exclude from discovery (e.g., {'q', 'z'})
   excluded_motions = {}, -- List of motion keys to exclude from discovery (e.g., {'Q', 'R'})
+  smart_highlighting = false, -- Enable real-time highlighting for delimiter-based text objects
   experimental = {
     dot_repeat = false,
     count_support = false,
