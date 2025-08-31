@@ -110,6 +110,7 @@ M.BeamSearchOperator = function(type)
   end)
 
   if ok then
+    -- Yank and delete operations should restore cursor position
     if
       (action == 'yank' or action == 'delete' or action == 'yankline' or action == 'deleteline')
       and saved_pos

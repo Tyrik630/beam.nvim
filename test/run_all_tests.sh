@@ -36,7 +36,12 @@ for test_file in "${TEST_FILES[@]}"; do
     test_name="${test_name//_/ }"
     
     # Run test and capture output
-    output=$(nvim -l "test/$test_file" 2>&1)
+    # Use minimal_init for spec files
+    if [[ "$test_file" == *_spec.lua ]]; then
+      output=$(nvim --headless -u test/minimal_init.lua -c "luafile test/$test_file" -c "qa!" 2>&1)
+    else
+      output=$(nvim -l "test/$test_file" 2>&1)
+    fi
     exit_code=$?
     
     # Check if test passed

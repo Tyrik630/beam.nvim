@@ -1,19 +1,18 @@
-.PHONY: test test-verbose format clean install-hooks
+.PHONY: test test-verbose test-old format clean install-hooks
 
-# Run comprehensive test suite (default)
+# Run tests with Plenary (default)
 test:
-	@./test/run_all_tests.sh
+	@echo "Running tests with Plenary..."
+	@nvim --headless -l test/run_tests.lua
 
-# Run verbose test suite with detailed output  
+# Run tests with output visible (not headless)
 test-verbose:
-	@for test in test/*.lua; do \
-		case "$$test" in \
-			*_spec.lua|*run_tests.lua) continue ;; \
-			*) echo "Running $$test..."; \
-			   nvim -l "$$test" || exit 1; \
-			   echo "" ;; \
-		esac \
-	done
+	@echo "Running tests with Plenary (verbose)..."
+	@nvim -l test/run_tests.lua
+
+# Run old test suite (for remaining non-migrated tests)
+test-old:
+	@./test/run_all_tests.sh
 
 # Format Lua code with stylua
 format:
