@@ -1,5 +1,5 @@
 #!/bin/sh
-# Pre-commit hook to format Lua files with stylua
+# Pre-commit hook to format Lua files and check documentation
 
 # Find stylua - check common locations
 STYLUA=""
@@ -21,6 +21,17 @@ $STYLUA .
 if [ -n "$(git diff --name-only)" ]; then
     echo "Files were formatted. Adding changes to commit..."
     git add -u
+fi
+
+# Check if README.md is being committed
+if git diff --cached --name-only | grep -q "README.md"; then
+    echo ""
+    echo "⚠️  WARNING: README.md is being committed!"
+    echo "   Don't forget to update doc/beam.txt if needed."
+    echo "   The documentation should stay in sync with README changes."
+    echo ""
+    echo "   Press Enter to continue or Ctrl-C to abort..."
+    read -r
 fi
 
 # Run tests to ensure nothing broke

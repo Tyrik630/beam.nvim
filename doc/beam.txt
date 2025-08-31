@@ -139,6 +139,7 @@ BASIC SETUP ~
     auto_discover_text_objects = true, -- Auto-discover all text objects
     excluded_text_objects = {},      -- Exclude text objects (e.g., {'q'})
     excluded_motions = {},            -- Exclude motions (e.g., {'Q', 'R'})
+    smart_highlighting = false,       -- Context-aware search highlighting
   })
 <<
 
@@ -178,6 +179,23 @@ FULL CONFIGURATION ~
     }
   })
 <
+
+SMART HIGHLIGHTING ~
+When `smart_highlighting = true`, beam constrains search results based on the
+text object being used. This means when searching with delimiter-based text
+objects, only matches within those delimiters are highlighted.
+
+Example:
+  Without smart highlighting: `,di"` → `/test` → highlights ALL "test"
+  With smart highlighting: `,di"` → `/test` → only highlights "test" inside quotes
+
+Supported text objects for smart highlighting:
+  - Quotes: `i"`, `a"`, `i'`, `a'`, `i``, `a``
+  - Brackets: `i(`, `a(`, `i[`, `a[`, `i{`, `a{`, `i<`, `a<`
+  - Alternative syntax: `ib`/`ab` (parentheses), `iB`/`aB` (braces), `iq`/`aq` (quotes)
+  - HTML/XML tags: `it`, `at`
+  - Block comments: `iC`, `aC`
+  - Function arguments: `ia`
 
 DISABLING DEFAULT MAPPINGS ~
 Set prefix to nil and create your own:
